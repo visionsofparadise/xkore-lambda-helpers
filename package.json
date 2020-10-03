@@ -1,0 +1,48 @@
+{
+	"name": "xkore-lambda-helpers",
+	"version": "0.0.29",
+	"main": "./dist/index.js",
+	"scripts": {
+		"update": "tsc && jest unit && npm version patch && npm publish"
+	},
+	"dependencies": {
+		"@types/aws-lambda": "^8.10.62",
+		"@types/node": "^13.13.21",
+		"@types/object.omit": "^3.0.0",
+		"@types/object.pick": "^1.3.0",
+		"@types/yup": "^0.26.32",
+		"dayjs": "^1.8.36",
+		"object.omit": "^3.0.0",
+		"object.pick": "^1.3.0",
+		"yup": "^0.28.3"
+	},
+	"devDependencies": {
+		"@types/jest": "^24.9.1",
+		"aws-lambda": "^1.0.6",
+		"aws-sdk": "^2.765.0",
+		"jest": "^24.9.0",
+		"ts-jest": "^24.2.0",
+		"ts-node": "^8.5.4",
+		"tslint": "^5.20.1",
+		"tslint-config-prettier": "^1.18.0",
+		"tslint-plugin-prettier": "^2.1.0",
+		"typescript": "^3.2.4"
+	},
+	"peerDependencies": {
+		"aws-sdk": "^2.759.0",
+		"aws-cdk": "^1.65.0",
+		"@aws-cdk/aws-apigateway": "^1.65.0",
+		"@aws-cdk/aws-lambda": "^1.65.0",
+		"@aws-cdk/core": "^1.65.0"
+	},
+	"author": "xKore",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/visionsofparadise/xlambdahelpers.git"
+	},
+	"bugs": {
+		"url": "https://github.com/visionsofparadise/xlambdahelpers/issues"
+	},
+	"homepage": "https://github.com/visionsofparadise/xlambdahelpers#readme"
+}
