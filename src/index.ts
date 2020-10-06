@@ -1,12 +1,12 @@
 export { masterFunction } from './cdk/masterFunction';
 export { createOutput } from './cdk/createOutput';
 export { CognitoAuthorizer } from './cdk/CognitoAuthorizer';
-export { createEventHelper } from './helpers/eventHelper';
-export { createEmailHelper } from './helpers/emailHelper';
+export { createEventHelper } from './util/eventHelper';
+export { createEmailHelper } from './util/emailHelper';
 export { Resource } from './models/Resource';
 export { Event } from './models/Event';
-export { EventBridgeEvent } from './types/EventBridgeEvent';
-export { BaseResource, ResourcePrimaryKey, ResourceList } from './types/Resource';
+export { EventBridgeEvent } from './models/Event';
+export { BaseResource, ResourcePrimaryKey, ResourceList } from './models/Resource';
 export { dbClient } from './util/dbClient';
 export { lambdaWrap } from './util/lambdaWrap';
 export {
@@ -20,4 +20,3 @@ export {
 } from './util/response';
 export { StreamFn, eventNameFilter, resourceTypeFilter, streamMap } from './util/streamUtils';
 export { unmarshallRecords, Record, Records } from './util/unmarshallRecords';
-export { Logger } from './util/logger';

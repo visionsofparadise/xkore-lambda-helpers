@@ -1,4 +1,8 @@
 .env*
 *.test.ts
 src
-.dynamodb
+node_modules
+.prettierrc
+jest.config.js
+tsconfig.json
+tslint.json

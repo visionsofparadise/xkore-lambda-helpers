@@ -1,5 +1,5 @@
-import { DynamoDBRecord } from 'aws-lambda';
-import { xlhLogger } from './logger';
+import { DynamoDBRecord } from 'aws-lambda/trigger/dynamodb-stream';
+import { logger } from '../logger';
 import { Records, Record } from './unmarshallRecords';
 
 export type StreamFn = (r: Array<DynamoDBRecord>) => Promise<Array<any>>;
@@ -15,9 +15,9 @@ export const resourceTypeFilter = (resourceType: string) => (r: DynamoDBRecord):
 		: false;
 
 export const streamMap = <Old, New>(mapFn: (r: Record<Old, New>) => Promise<any>) => async (rs: Records<Old, New>) => {
-	await Promise.all(rs.map(async r => mapFn(r).catch(xlhLogger.log)));
+	await Promise.all(rs.map(async r => mapFn(r).catch(logger.log)));
 
-	xlhLogger.log(`Processed ${rs.length} items`);
+	logger.log(`Processed ${rs.length} items`);
 
 	return rs;
 };

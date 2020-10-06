@@ -1,9 +1,9 @@
-import { SESV2 } from 'aws-sdk';
-import { xlhLogger } from '../util/logger';
+import SESV2 from 'aws-sdk/clients/sesv2';
+import { logger } from '../logger';
 
 export const createEmailHelper = (params: { ses: SESV2; from: string }) => ({
 	send: async ({ email, subject, message }: { email: string; subject: string; message: string }) => {
-		xlhLogger.log({ email, subject, message });
+		logger.log({ email, subject, message });
 
 		return params.ses
 			.sendEmail({

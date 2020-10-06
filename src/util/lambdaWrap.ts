@@ -1,6 +1,6 @@
 import { response, SUCCESS_200, SUCCESS_NO_CONTENT_204 } from './response';
-import { APIGatewayEvent } from 'aws-lambda';
-import { xlhLogger } from './logger';
+import { logger } from '../logger';
+import { APIGatewayEvent } from 'aws-lambda/trigger/api-gateway-proxy';
 
 interface TypeParams {
 	params?: object;
@@ -23,7 +23,7 @@ export const lambdaWrap = <Params extends TypeParams>(
 	config: IConfig | undefined,
 	fn: (e: IEvent & Params) => any
 ) => async (event: APIGatewayEvent) => {
-	xlhLogger.log({ event });
+	logger.log({ event });
 
 	try {
 		let e = {
@@ -39,12 +39,12 @@ export const lambdaWrap = <Params extends TypeParams>(
 
 		const data = await fn(e as IEvent & Params);
 
-		xlhLogger.log(data);
+		logger.log(data);
 
 		if (!data) return response(SUCCESS_NO_CONTENT_204);
 		return response(SUCCESS_200(data));
 	} catch (error) {
-		xlhLogger.log({ error });
+		logger.log({ error });
 
 		if (error.statusCode && error.statusCode < 500) return error;
 

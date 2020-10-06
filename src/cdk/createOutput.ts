@@ -1,4 +1,5 @@
-import { CfnOutput, CfnOutputProps, Construct } from '@aws-cdk/core';
+import { CfnOutput, CfnOutputProps } from '@aws-cdk/core/lib/cfn-output';
+import { Construct } from '@aws-cdk/core/lib/construct-compat';
 
 export const createOutput = (
 	scope: Construct,

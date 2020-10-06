@@ -1,14 +1,30 @@
-import { BaseResource } from '../types/Resource';
 import { dbClient } from '../util/dbClient';
-import pick from 'object.pick';
-import omit from 'object.omit';
+import upick from 'upick';
+import uomit from 'uomit';
 import day from 'dayjs';
-import * as yup from 'yup';
+import { ObjectSchema, string, number, object } from 'yup';
+import EventBridge from 'aws-sdk/clients/eventbridge';
+
+export type ResourcePrimaryKey = {
+	pk: string;
+	sk: string;
+};
+
+export type BaseResource = {
+	resourceType: string;
+	createdAt: number;
+	updatedAt: number;
+} & ResourcePrimaryKey;
+
+export interface ResourceList<Resource extends ResourcePrimaryKey> {
+	Items?: Array<Resource> | undefined;
+	LastEvaluatedKey?: ResourcePrimaryKey;
+}
 
 interface Config<Data extends object & BaseResource> {
 	db: ReturnType<typeof dbClient>;
-	eventbridge: AWS.EventBridge;
-	validationSchema: yup.ObjectSchema<Data>;
+	eventbridge: EventBridge;
+	validationSchema: ObjectSchema<Data>;
 	hiddenKeys: Array<keyof Data>;
 	ownerKeys: Array<keyof Data>;
 }
@@ -22,7 +38,7 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 		params: Partial<Data> & {
 			config: Pick<Config<Data>, 'db' | 'eventbridge'> &
 				Partial<Pick<Config<Data>, 'hiddenKeys' | 'ownerKeys'>> & {
-					validationSchema: yup.ObjectSchema<Attributes>;
+					validationSchema: ObjectSchema<Attributes>;
 				};
 		}
 	) {
@@ -38,7 +54,7 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 			createdAt: params.createdAt || timestamp,
 			updatedAt: params.updatedAt || timestamp,
 
-			...omit(params, 'config')
+			...uomit(params, ['config'])
 		} as Data;
 
 		this.initial = data;
@@ -51,15 +67,13 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 			hiddenKeys: params.config.hiddenKeys || [],
 			ownerKeys: params.config.ownerKeys || [],
 
-			validationSchema: yup
-				.object({
-					pk: yup.string().required(),
-					sk: yup.string().required(),
-					resourceType: yup.string().required(),
-					createdAt: yup.number().positive().integer().required(),
-					updatedAt: yup.number().positive().integer().required()
-				})
-				.concat(params.config.validationSchema) as yup.ObjectSchema<Data>
+			validationSchema: object({
+				pk: string().required(),
+				sk: string().required(),
+				resourceType: string().required(),
+				createdAt: number().positive().integer().required(),
+				updatedAt: number().positive().integer().required()
+			}).concat(params.config.validationSchema) as ObjectSchema<Data>
 		};
 	}
 
@@ -78,15 +92,15 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 	}
 
 	get owner() {
-		return omit(this.current, this.config.hiddenKeys);
+		return uomit(this.current, this.config.hiddenKeys);
 	}
 
 	get public() {
-		return omit(this.current, [...this.config.hiddenKeys, ...this.config.ownerKeys]);
+		return uomit(this.current, [...this.config.hiddenKeys, ...this.config.ownerKeys]);
 	}
 
 	get pk() {
-		return pick(this.current, ['pk', 'sk']);
+		return upick(this.current, ['pk', 'sk']);
 	}
 
 	save = async (isNew: boolean = false) => {

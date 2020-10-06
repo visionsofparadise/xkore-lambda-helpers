@@ -1,5 +1,5 @@
 import EventBridge from 'aws-sdk/clients/eventbridge';
-import { xlhLogger } from '../util/logger';
+import { logger } from '../logger';
 import { Event } from '../models/Event';
 
 interface IEvent {
@@ -9,7 +9,7 @@ interface IEvent {
 
 export const createEventHelper = (params: { eventbridge: EventBridge; Source: string }) => ({
 	send: async (event: IEvent | Array<IEvent>) => {
-		xlhLogger.log({ event });
+		logger.log({ event });
 
 		return params.eventbridge
 			.putEvents({

@@ -1,4 +1,4 @@
-import { xlhLogger } from './logger';
+import { logger } from '../logger';
 
 interface Params {
 	statusCode: number;
@@ -23,7 +23,7 @@ export const response = ({ statusCode, body, headers }: Params): Response => {
 		}
 	};
 
-	statusCode < 400 ? xlhLogger.log(response) : xlhLogger.log(response);
+	statusCode < 400 ? logger.log(response) : logger.log(response);
 
 	return response;
 };

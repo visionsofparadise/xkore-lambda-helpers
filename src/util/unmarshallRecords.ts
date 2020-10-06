@@ -1,7 +1,7 @@
-import { DynamoDBRecord } from 'aws-lambda';
+import { DynamoDBRecord } from 'aws-lambda/trigger/dynamodb-stream';
 import { Converter } from 'aws-sdk/clients/dynamodb';
-import { BaseResource } from '../types/Resource';
-import { xlhLogger } from './logger';
+import { logger } from '../logger';
+import { BaseResource } from '../models/Resource';
 
 export type Records<OldResource, NewResource> = Array<Record<OldResource, NewResource>>;
 
@@ -24,7 +24,7 @@ export const unmarshallRecords = <
 
 		const records = { newRecord, oldRecord };
 
-		xlhLogger.log({ records });
+		logger.log({ records });
 
 		return records;
 	}) as Records<OldResource, NewResource>;

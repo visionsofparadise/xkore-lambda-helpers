@@ -1,5 +1,5 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { ResourceList, ResourcePrimaryKey } from '../types/Resource';
+import { ResourceList, ResourcePrimaryKey } from '../models/Resource';
 import day from 'dayjs';
 import { response, BAD_REQUEST_400 } from './response';
 
