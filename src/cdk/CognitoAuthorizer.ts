@@ -1,6 +1,5 @@
-import { CfnAuthorizer, CfnAuthorizerProps } from '@aws-cdk/aws-apigateway/lib/apigateway.generated';
-import { AuthorizationType, MethodOptions } from '@aws-cdk/aws-apigateway/lib/method';
-import { Construct } from '@aws-cdk/core/lib/construct-compat';
+import { MethodOptions, CfnAuthorizer, CfnAuthorizerProps, AuthorizationType } from '@aws-cdk/aws-apigateway';
+import { Construct } from '@aws-cdk/core';
 
 export class CognitoAuthorizer extends Construct {
 	public readonly methodOptions: Pick<MethodOptions, 'authorizationType' | 'authorizer'>;

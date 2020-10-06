@@ -1,6 +1,5 @@
-import { Function, FunctionProps } from '@aws-cdk/aws-lambda/lib/function';
-import { Runtime } from '@aws-cdk/aws-lambda/lib/runtime';
-import { Construct } from '@aws-cdk/core/lib/construct-compat';
+import { FunctionProps, Function, Runtime } from '@aws-cdk/aws-lambda';
+import { Construct } from '@aws-cdk/core';
 
 export const masterFunction = (masterConfig: Pick<FunctionProps, 'code'>) => (
 	scope: Construct,
