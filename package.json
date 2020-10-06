@@ -1,6 +1,6 @@
 {
 	"name": "xkore-lambda-helpers",
-	"version": "0.0.30",
+	"version": "0.0.31",
 	"main": "./dist/index.js",
 	"scripts": {
 		"patch": "tsc && jest unit && npm version patch && npm publish"
