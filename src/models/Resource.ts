@@ -3,7 +3,6 @@ import upick from 'upick';
 import uomit from 'uomit';
 import day from 'dayjs';
 import { ObjectSchema, string, number, object } from 'yup';
-import EventBridge from 'aws-sdk/clients/eventbridge';
 
 export type ResourcePrimaryKey = {
 	pk: string;
@@ -23,7 +22,6 @@ export interface ResourceList<Resource extends ResourcePrimaryKey> {
 
 interface Config<Data extends object & BaseResource> {
 	db: ReturnType<typeof dbClient>;
-	eventbridge: EventBridge;
 	validationSchema: ObjectSchema<Data>;
 	hiddenKeys: Array<keyof Data>;
 	ownerKeys: Array<keyof Data>;
@@ -36,7 +34,7 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 
 	constructor(
 		params: Partial<Data> & {
-			config: Pick<Config<Data>, 'db' | 'eventbridge'> &
+			config: Pick<Config<Data>, 'db'> &
 				Partial<Pick<Config<Data>, 'hiddenKeys' | 'ownerKeys'>> & {
 					validationSchema: ObjectSchema<Attributes>;
 				};
@@ -62,7 +60,6 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 
 		this.config = {
 			db: params.config.db,
-			eventbridge: params.config.eventbridge,
 
 			hiddenKeys: params.config.hiddenKeys || [],
 			ownerKeys: params.config.ownerKeys || [],
