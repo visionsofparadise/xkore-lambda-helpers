@@ -14,10 +14,10 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		get: async <Data extends ResourcePrimaryKey>(query: WithDefaults<DocumentClient.GetItemInput>) => {
 			console.log({ query });
 
-			const data = (docDB
+			const data = ((await docDB
 				.get({ ...queryDefaults, ...query })
 				.promise()
-				.then(result => result.Item) as unknown) as Promise<Data>;
+				.then(result => result.Item)) as unknown) as Promise<Data>;
 
 			console.log({ data });
 
