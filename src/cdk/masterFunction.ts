@@ -4,12 +4,11 @@ import { Construct } from '@aws-cdk/core';
 export const masterFunction = (masterConfig: Pick<FunctionProps, 'code'>) => (
 	scope: Construct,
 	fnName: string,
-	handlerName?: string,
 	config?: Partial<FunctionProps>
 ) =>
-	new Function(scope, `${fnName}${handlerName || 'Handler'}`, {
+	new Function(scope, `${fnName}Handler`, {
 		runtime: Runtime.NODEJS_12_X,
-		handler: `${fnName}.${handlerName || 'handler'}`,
+		handler: `${fnName}.handler`,
 		...masterConfig,
 		...config
 	});
