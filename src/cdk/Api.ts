@@ -27,7 +27,7 @@ export class Api extends Construct {
 		super(scope, id);
 
 		const restApi = new RestApi(this, 'restApi', {
-			restApiName: props.deploymentName + '-api',
+			restApiName: `${props.deploymentName}-${id}`,
 			description: props.deploymentName,
 			defaultCorsPreflightOptions: {
 				allowOrigins: Cors.ALL_ORIGINS
