@@ -6,8 +6,8 @@ import { createOutput } from './createOutput';
 import { DomainBasePathMapping } from './DomainBasePathMapping';
 
 export class Api<Cognito extends string | undefined, ApiKey extends string | undefined> extends Construct {
-	public readonly apiUrl: CfnOutput;
 	public readonly restApi: RestApi;
+	public readonly apiUrlOutput: CfnOutput;
 	public readonly cognitoAuthorizer!: Cognito extends string ? CognitoAuthorizer : undefined;
 	public readonly apiKeyAuthorizer!: ApiKey extends string ? ApiKeyAuthorizer : undefined;
 
@@ -21,8 +21,8 @@ export class Api<Cognito extends string | undefined, ApiKey extends string | und
 			basePath: string;
 			aliasTarget: string;
 			aliasHostedZoneId: string;
-			cognitoUserPoolArn: Cognito;
-			apiKeyFunctionArn: ApiKey;
+			cognitoUserPoolArn?: Cognito;
+			apiKeyFunctionArn?: ApiKey;
 		}
 	) {
 		super(scope, id);
@@ -65,6 +65,6 @@ export class Api<Cognito extends string | undefined, ApiKey extends string | und
 			});
 		}
 
-		this.apiUrl = createOutput(this, props.deploymentName, 'apiUrl', restApi.url);
+		this.apiUrlOutput = createOutput(this, props.deploymentName, 'apiUrl', restApi.url);
 	}
 }
