@@ -2,8 +2,10 @@ import { CfnAuthorizer, CfnAuthorizerProps, AuthorizationType, TokenAuthorizer }
 import { Construct } from '@aws-cdk/core';
 
 export class CognitoAuthorizer extends Construct {
-	public readonly authorizerId: TokenAuthorizer['authorizerId'];
-	public readonly authorizationType: TokenAuthorizer['authorizationType'];
+	public readonly authorizer: {
+		authorizerId: TokenAuthorizer['authorizerId'];
+		authorizationType: TokenAuthorizer['authorizationType'];
+	};
 
 	constructor(
 		scope: Construct,
@@ -20,7 +22,9 @@ export class CognitoAuthorizer extends Construct {
 			providerArns: [props.providerArn]
 		});
 
-		this.authorizerId = cognitoAuthorizer.ref;
-		this.authorizationType = AuthorizationType.COGNITO;
+		this.authorizer = {
+			authorizerId: cognitoAuthorizer.ref,
+			authorizationType: AuthorizationType.COGNITO
+		};
 	}
 }
