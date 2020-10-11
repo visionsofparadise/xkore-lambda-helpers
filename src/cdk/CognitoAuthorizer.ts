@@ -1,29 +1,26 @@
-import { MethodOptions, CfnAuthorizer, CfnAuthorizerProps, AuthorizationType } from '@aws-cdk/aws-apigateway';
+import { CfnAuthorizer, CfnAuthorizerProps, AuthorizationType, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
 import { Construct } from '@aws-cdk/core';
 
 export class CognitoAuthorizer extends Construct {
-	public readonly methodOptions: Pick<MethodOptions, 'authorizationType' | 'authorizer'>;
+	public readonly authorizerId: TokenAuthorizer['authorizerId'];
+	public readonly authorizationType: TokenAuthorizer['authorizationType'];
 
 	constructor(
 		scope: Construct,
 		id: string,
-		props: Pick<CfnAuthorizerProps, 'name' | 'restApiId' | 'providerArns'> & Partial<CfnAuthorizerProps>
+		props: Pick<CfnAuthorizerProps, 'restApiId'> & { providerArn: string } & Partial<CfnAuthorizerProps>
 	) {
 		super(scope, id);
 
 		const cognitoAuthorizer = new CfnAuthorizer(this, 'userPoolAuthorizer', {
-			name: props.name,
+			name: id,
 			restApiId: props.restApiId,
 			type: AuthorizationType.COGNITO,
 			identitySource: 'method.request.header.Authorization',
-			providerArns: props.providerArns
+			providerArns: [props.providerArn]
 		});
 
-		this.methodOptions = {
-			authorizationType: AuthorizationType.COGNITO,
-			authorizer: {
-				authorizerId: cognitoAuthorizer.ref
-			}
-		};
+		this.authorizerId = cognitoAuthorizer.ref;
+		this.authorizationType = AuthorizationType.COGNITO;
 	}
 }
