@@ -1,15 +1,10 @@
 import { RestApi, Cors } from '@aws-cdk/aws-apigateway';
-import { CfnOutput, Construct } from '@aws-cdk/core';
-import { ApiKeyAuthorizer } from './ApiKeyAuthorizer';
-import { CognitoAuthorizer } from './CognitoAuthorizer';
-import { createOutput } from './createOutput';
+import { Construct } from '@aws-cdk/core';
 import { DomainBasePathMapping } from './DomainBasePathMapping';
 
-export class Api<Cognito extends string | undefined, ApiKey extends string | undefined> extends Construct {
-	public readonly restApi: RestApi;
-	public readonly apiUrlOutput: CfnOutput;
-	public readonly cognitoAuthorizer!: Cognito extends string ? CognitoAuthorizer : undefined;
-	public readonly apiKeyAuthorizer!: ApiKey extends string ? ApiKeyAuthorizer : undefined;
+export class Api extends Construct {
+	public readonly api: RestApi;
+	public readonly root: RestApi['root'];
 
 	constructor(
 		scope: Construct,
@@ -21,8 +16,6 @@ export class Api<Cognito extends string | undefined, ApiKey extends string | und
 			basePath: string;
 			aliasTarget: string;
 			aliasHostedZoneId: string;
-			cognitoUserPoolArn?: Cognito;
-			apiKeyFunctionArn?: ApiKey;
 		}
 	) {
 		super(scope, id);
@@ -35,26 +28,6 @@ export class Api<Cognito extends string | undefined, ApiKey extends string | und
 			}
 		});
 
-		this.restApi = restApi;
-
-		if (props.cognitoUserPoolArn == 'string') {
-			const cognitoAuthorizer = new CognitoAuthorizer(this, 'cognitoAuthorizer', {
-				name: props.deploymentName + '-cognitoAuthorizer',
-				restApiId: restApi.restApiId,
-				providerArns: [props.cognitoUserPoolArn as string]
-			});
-
-			this.cognitoAuthorizer = cognitoAuthorizer as Cognito extends string ? CognitoAuthorizer : undefined;
-		}
-
-		if (props.apiKeyFunctionArn) {
-			const apiKeyAuthorizer = new ApiKeyAuthorizer(this, 'apiKeyAuthorizer', {
-				functionArn: props.apiKeyFunctionArn as string
-			});
-
-			this.apiKeyAuthorizer = apiKeyAuthorizer as ApiKey extends string ? ApiKeyAuthorizer : undefined;
-		}
-
 		if (props.stage === 'prod') {
 			new DomainBasePathMapping(this, 'basePathMapping', {
 				domainName: props.domainName,
@@ -65,6 +38,7 @@ export class Api<Cognito extends string | undefined, ApiKey extends string | und
 			});
 		}
 
-		this.apiUrlOutput = createOutput(this, props.deploymentName, 'apiUrl', restApi.url);
+		this.api = restApi;
+		this.root = restApi.root;
 	}
 }
