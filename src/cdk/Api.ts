@@ -1,14 +1,15 @@
-import { RestApi, Cors, MethodOptions } from '@aws-cdk/aws-apigateway';
+import { RestApi, Cors } from '@aws-cdk/aws-apigateway';
 import { CfnOutput, Construct } from '@aws-cdk/core';
 import { ApiKeyAuthorizer } from './ApiKeyAuthorizer';
 import { CognitoAuthorizer } from './CognitoAuthorizer';
 import { createOutput } from './createOutput';
 import { DomainBasePathMapping } from './DomainBasePathMapping';
 
-export class Api extends Construct {
+export class Api<Cognito extends string | undefined, ApiKey extends string | undefined> extends Construct {
 	public readonly apiUrl: CfnOutput;
 	public readonly restApi: RestApi;
-	public readonly authorizer?: Construct & Pick<MethodOptions, 'authorizationType' | 'authorizer'>;
+	public readonly cognitoAuthorizer!: Cognito extends string ? CognitoAuthorizer : undefined;
+	public readonly apiKeyAuthorizer!: ApiKey extends string ? ApiKeyAuthorizer : undefined;
 
 	constructor(
 		scope: Construct,
@@ -20,8 +21,8 @@ export class Api extends Construct {
 			basePath: string;
 			aliasTarget: string;
 			aliasHostedZoneId: string;
-			cognitoAuthorizer?: { userPoolArn: string };
-			apiKeyAuthorizer?: { functionArn: string };
+			cognitoUserPoolArn: Cognito;
+			apiKeyFunctionArn: ApiKey;
 		}
 	) {
 		super(scope, id);
@@ -36,22 +37,22 @@ export class Api extends Construct {
 
 		this.restApi = restApi;
 
-		if (props.cognitoAuthorizer) {
+		if (props.cognitoUserPoolArn == 'string') {
 			const cognitoAuthorizer = new CognitoAuthorizer(this, 'cognitoAuthorizer', {
 				name: props.deploymentName + '-cognitoAuthorizer',
 				restApiId: restApi.restApiId,
-				providerArns: [props.cognitoAuthorizer.userPoolArn]
+				providerArns: [props.cognitoUserPoolArn as string]
 			});
 
-			this.authorizer = cognitoAuthorizer;
+			this.cognitoAuthorizer = cognitoAuthorizer as Cognito extends string ? CognitoAuthorizer : undefined;
 		}
 
-		if (props.apiKeyAuthorizer) {
+		if (props.apiKeyFunctionArn) {
 			const apiKeyAuthorizer = new ApiKeyAuthorizer(this, 'apiKeyAuthorizer', {
-				functionArn: props.apiKeyAuthorizer.functionArn
+				functionArn: props.apiKeyFunctionArn as string
 			});
 
-			this.authorizer = apiKeyAuthorizer;
+			this.apiKeyAuthorizer = apiKeyAuthorizer as ApiKey extends string ? ApiKeyAuthorizer : undefined;
 		}
 
 		if (props.stage === 'prod') {
