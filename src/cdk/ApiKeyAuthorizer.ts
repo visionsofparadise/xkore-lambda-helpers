@@ -11,9 +11,13 @@ export class ApiKeyAuthorizer extends Construct {
 	constructor(scope: Construct, id: string, props: { functionArn: string; cacheTtl?: number }) {
 		super(scope, id);
 
-		const apiKeyAuthorizerHandler = Function.fromFunctionArn(this, 'apiKeyAuthorizer', props.functionArn);
+		const apiKeyAuthorizerHandler = Function.fromFunctionArn(
+			this,
+			'apiKeyAuthorizerFunctionFromArn',
+			props.functionArn
+		);
 
-		const apiKeyAuthorizer = new TokenAuthorizer(this, 'apiKeyAuthorizer', {
+		const apiKeyAuthorizer = new TokenAuthorizer(this, 'tokenAuthorizer', {
 			handler: apiKeyAuthorizerHandler,
 			resultsCacheTtl: Duration.minutes(props.cacheTtl || 5)
 		});
