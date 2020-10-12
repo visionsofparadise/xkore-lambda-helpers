@@ -18,7 +18,6 @@ export class CustomDynamoDBItem extends Construct {
 			action: 'putItem',
 			parameters: {
 				TableName: props.tableName,
-				ConditionExpression: `attribute_not_exists(${props.pkKey})`,
 				Item: AWS.DynamoDB.Converter.marshall(props.item)
 			}
 		};
@@ -29,7 +28,6 @@ export class CustomDynamoDBItem extends Construct {
 			action: 'putItem',
 			parameters: {
 				TableName: props.tableName,
-				ConditionExpression: `attribute_exists(${props.pkKey})`,
 				Item: AWS.DynamoDB.Converter.marshall(props.item)
 			}
 		};
@@ -39,7 +37,6 @@ export class CustomDynamoDBItem extends Construct {
 			action: 'deleteItem',
 			parameters: {
 				TableName: props.tableName,
-				ConditionExpression: `attribute_exists(${props.pkKey})`,
 				Key: AWS.DynamoDB.Converter.marshall({
 					pk: props.item.pk,
 					sk: props.item.sk
