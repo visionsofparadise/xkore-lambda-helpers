@@ -1,6 +1,6 @@
-import { TokenAuthorizer } from '@aws-cdk/aws-apigateway';
-import { Function } from '@aws-cdk/aws-lambda';
-import { Construct, Duration } from '@aws-cdk/core';
+import { AuthorizationType, CfnAuthorizer, CfnAuthorizerProps, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
+import { Function, IFunction } from '@aws-cdk/aws-lambda';
+import { Construct, Stack } from '@aws-cdk/core';
 
 export class ApiKeyAuthorizer extends Construct {
 	public readonly authorizer: {
@@ -8,8 +8,20 @@ export class ApiKeyAuthorizer extends Construct {
 		authorizationType: TokenAuthorizer['authorizationType'];
 	};
 
-	constructor(scope: Construct, id: string, props: { functionArn: string; cacheTtl?: number }) {
+	constructor(
+		scope: Construct,
+		id: string,
+		props: Pick<CfnAuthorizerProps, 'restApiId'> & { functionArn: string; cacheTtl?: number } & Partial<
+				CfnAuthorizerProps
+			>
+	) {
 		super(scope, id);
+
+		const lambdaAuthorizerArn = (handler: IFunction) => {
+			return `arn:${Stack.of(handler).partition}:apigateway:${
+				Stack.of(handler).region
+			}:lambda:path/2015-03-31/functions/${handler.functionArn}/invocations`;
+		};
 
 		const apiKeyAuthorizerHandler = Function.fromFunctionArn(
 			this,
@@ -17,14 +29,18 @@ export class ApiKeyAuthorizer extends Construct {
 			props.functionArn
 		);
 
-		const apiKeyAuthorizer = new TokenAuthorizer(this, 'tokenAuthorizer', {
-			handler: apiKeyAuthorizerHandler,
-			resultsCacheTtl: Duration.minutes(props.cacheTtl || 5)
+		const apiKeyAuthorizer = new CfnAuthorizer(this, 'tokenAuthorizer', {
+			name: id,
+			restApiId: props.restApiId,
+			type: 'TOKEN',
+			authorizerUri: lambdaAuthorizerArn(apiKeyAuthorizerHandler),
+			identitySource: 'method.request.header.Authorization',
+			authorizerResultTtlInSeconds: 300
 		});
 
 		this.authorizer = {
-			authorizerId: apiKeyAuthorizer.authorizerId,
-			authorizationType: apiKeyAuthorizer.authorizationType
+			authorizerId: apiKeyAuthorizer.ref,
+			authorizationType: AuthorizationType.CUSTOM
 		};
 	}
 }
