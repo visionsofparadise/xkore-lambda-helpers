@@ -63,3 +63,20 @@ it('gets cognito username', async () => {
 
 	return;
 });
+
+it('gets principalId', async () => {
+	const handler = lambdaWrap<{ userId: string; body: {} }>({ customAuth: true }, async e => {
+		return e.userId;
+	});
+
+	const response = await handler(({
+		requestContext: {
+			authorizer: {
+				principalId: 'test'
+			}
+		}
+	} as unknown) as APIGatewayProxyEvent);
+	expect(response.body).toBe('test');
+
+	return;
+});

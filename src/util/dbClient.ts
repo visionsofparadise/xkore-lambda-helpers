@@ -57,6 +57,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 
 			return data;
 		},
+
 		update: async <Data extends ResourcePrimaryKey>(query: WithDefaults<DocumentClient.UpdateItemInput>) => {
 			console.log({ query });
 
@@ -92,7 +93,8 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 
 			return data;
 		},
-		scan: async <Data extends ResourcePrimaryKey>(query: WithDefaults<DocumentClient.ScanInput>) => {
+
+		scan: async <Data extends ResourcePrimaryKey>(query?: WithDefaults<DocumentClient.ScanInput>) => {
 			console.log({ query });
 
 			return (docDB.scan({ ...queryDefaults, ...query }).promise() as unknown) as ResourceList<Data>;

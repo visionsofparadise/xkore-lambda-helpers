@@ -2,22 +2,20 @@ import { RestApi, Cors } from '@aws-cdk/aws-apigateway';
 import { Construct } from '@aws-cdk/core';
 import { DomainBasePathMapping } from './DomainBasePathMapping';
 
+export interface ApiProps {
+	readonly deploymentName: string;
+	readonly stage: string;
+	readonly domainName: string;
+	readonly basePath: string;
+	readonly aliasTarget: string;
+	readonly aliasHostedZoneId: string;
+}
+
 export class Api extends Construct {
 	public readonly api: RestApi;
 	public readonly root: RestApi['root'];
 
-	constructor(
-		scope: Construct,
-		id: string,
-		props: {
-			deploymentName: string;
-			stage: string;
-			domainName: string;
-			basePath: string;
-			aliasTarget: string;
-			aliasHostedZoneId: string;
-		}
-	) {
+	constructor(scope: Construct, id: string, props: ApiProps) {
 		super(scope, id);
 
 		const restApi = new RestApi(this, 'restApi', {
