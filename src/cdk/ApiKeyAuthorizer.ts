@@ -9,11 +9,11 @@ export interface TokenAuthorizerProps extends LambdaAuthorizerProps {
 	readonly identitySource?: string;
 }
 
-function lambdaAuthorizerArn(handler: IFunction) {
+const lambdaAuthorizerArn = (handler: IFunction) => {
 	return `arn:${Stack.of(handler).partition}:apigateway:${Stack.of(handler).region}:lambda:path/2015-03-31/functions/${
 		handler.functionArn
 	}/invocations`;
-}
+};
 
 export class ApiKeyAuthorizer extends LambdaAuthorizer {
 	public readonly authorizerId: string;
@@ -28,12 +28,12 @@ export class ApiKeyAuthorizer extends LambdaAuthorizer {
 		super(scope, id, props);
 
 		const customAuthorizer = new CfnAuthorizer(this, 'customAuthorizer', {
-			name: props.authorizerName ?? this.node.uniqueId,
+			name: `${props.authorizerName}${this.node.uniqueId}`,
 			restApiId: props.restApiId,
 			type: 'TOKEN',
 			authorizerUri: lambdaAuthorizerArn(props.handler),
-			authorizerCredentials: props.assumeRole?.roleArn,
-			authorizerResultTtlInSeconds: props.resultsCacheTtl?.toSeconds(),
+			authorizerCredentials: props.assumeRole && props.assumeRole.roleArn,
+			authorizerResultTtlInSeconds: props.resultsCacheTtl && props.resultsCacheTtl.toSeconds(),
 			identitySource: props.identitySource || 'method.request.header.Authorization',
 			identityValidationExpression: props.validationRegex
 		});
