@@ -10,9 +10,7 @@ export interface TokenAuthorizerProps extends LambdaAuthorizerProps {
 }
 
 const lambdaAuthorizerArn = (handler: IFunction) => {
-	return `arn:${Stack.of(handler).partition}:apigateway:${Stack.of(handler).region}:lambda:path/2015-03-31/functions/${
-		handler.functionArn
-	}/invocations`;
+	return `arn:${handler.env.account}:apigateway:${handler.env.region}:lambda:path/2015-03-31/functions/${handler.functionArn}/invocations`;
 };
 
 export class ApiKeyAuthorizer extends LambdaAuthorizer {
