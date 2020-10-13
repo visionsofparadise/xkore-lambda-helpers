@@ -1,3 +1,4 @@
+import { RestApi } from '@aws-cdk/aws-apigateway';
 import { Function } from '@aws-cdk/aws-lambda';
 import { Construct } from '@aws-cdk/core';
 import { Api, ApiProps } from './Api';
@@ -8,6 +9,7 @@ export interface ApiKeyApiProps extends ApiProps {
 }
 
 export class ApiKeyApi extends Api {
+	public readonly apiKeyApi: RestApi;
 	public readonly apiKeyAuthorizer: ApiKeyAuthorizer;
 
 	constructor(scope: Construct, id: string, props: ApiKeyApiProps) {
@@ -19,5 +21,7 @@ export class ApiKeyApi extends Api {
 			restApiId: this.api.restApiId,
 			handler
 		});
+
+		this.apiKeyApi = this.api;
 	}
 }

@@ -13,7 +13,6 @@ export interface ApiProps {
 
 export class Api extends Construct {
 	public readonly api: RestApi;
-	public readonly root: RestApi['root'];
 
 	constructor(scope: Construct, id: string, props: ApiProps) {
 		super(scope, id);
@@ -37,6 +36,5 @@ export class Api extends Construct {
 		}
 
 		this.api = restApi;
-		this.root = restApi.root;
 	}
 }

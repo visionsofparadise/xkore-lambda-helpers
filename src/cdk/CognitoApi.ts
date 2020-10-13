@@ -1,3 +1,4 @@
+import { RestApi } from '@aws-cdk/aws-apigateway';
 import { Construct } from '@aws-cdk/core';
 import { Api, ApiProps } from './Api';
 import { CognitoAuthorizer } from './CognitoAuthorizer';
@@ -7,6 +8,7 @@ export interface CognitoApiProps extends ApiProps {
 }
 
 export class CognitoApi extends Api {
+	public readonly cognitoApi: RestApi;
 	public readonly cognitoAuthorizer: CognitoAuthorizer;
 
 	constructor(scope: Construct, id: string, props: CognitoApiProps) {
@@ -16,5 +18,7 @@ export class CognitoApi extends Api {
 			restApiId: this.api.restApiId,
 			providerArn: props.userPoolArn
 		});
+
+		this.cognitoApi = this.api;
 	}
 }
