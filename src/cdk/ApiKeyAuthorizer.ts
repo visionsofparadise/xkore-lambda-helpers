@@ -1,31 +1,55 @@
-import { AuthorizationType, CfnAuthorizer, CfnAuthorizerProps, TokenAuthorizer } from '@aws-cdk/aws-apigateway';
-import { Construct } from '@aws-cdk/core';
+import { CfnAuthorizer, LambdaAuthorizerProps } from '@aws-cdk/aws-apigateway';
+import { IFunction } from '@aws-cdk/aws-lambda';
+import { Construct, Stack } from '@aws-cdk/core';
+import { LambdaAuthorizer } from './LambdaAuthorizer';
 
-export class ApiKeyAuthorizer extends Construct {
+export interface TokenAuthorizerProps extends LambdaAuthorizerProps {
+	readonly restApiId: string;
+	readonly validationRegex?: string;
+	readonly identitySource?: string;
+}
+
+function lambdaAuthorizerArn(handler: IFunction) {
+	return `arn:${Stack.of(handler).partition}:apigateway:${Stack.of(handler).region}:lambda:path/2015-03-31/functions/${
+		handler.functionArn
+	}/invocations`;
+}
+
+export class ApiKeyAuthorizer extends LambdaAuthorizer {
+	public readonly authorizerId: string;
+	public readonly authorizerArn: string;
+
 	public readonly authorizer: {
-		authorizerId: TokenAuthorizer['authorizerId'];
-		authorizationType: TokenAuthorizer['authorizationType'];
+		authorizerId: string;
+		authorizerArn: string;
 	};
 
-	constructor(
-		scope: Construct,
-		id: string,
-		props: Pick<CfnAuthorizerProps, 'restApiId'> & { authorizeUri: string } & Partial<CfnAuthorizerProps>
-	) {
-		super(scope, id);
+	constructor(scope: Construct, id: string, props: TokenAuthorizerProps) {
+		super(scope, id, props);
 
-		const apiKeyAuthorizer = new CfnAuthorizer(this, 'tokenAuthorizer', {
-			name: id,
+		const customAuthorizer = new CfnAuthorizer(this, 'customAuthorizer', {
+			name: props.authorizerName ?? this.node.uniqueId,
 			restApiId: props.restApiId,
 			type: 'TOKEN',
-			authorizerUri: props.authorizeUri,
-			identitySource: 'method.request.header.Authorization',
-			authorizerResultTtlInSeconds: 300
+			authorizerUri: lambdaAuthorizerArn(props.handler),
+			authorizerCredentials: props.assumeRole?.roleArn,
+			authorizerResultTtlInSeconds: props.resultsCacheTtl?.toSeconds(),
+			identitySource: props.identitySource || 'method.request.header.Authorization',
+			identityValidationExpression: props.validationRegex
+		});
+
+		this.authorizerId = customAuthorizer.ref;
+		this.authorizerArn = Stack.of(this).formatArn({
+			service: 'execute-api',
+			resource: props.restApiId,
+			resourceName: `authorizers/${this.authorizerId}`
 		});
 
 		this.authorizer = {
-			authorizerId: apiKeyAuthorizer.ref,
-			authorizationType: AuthorizationType.CUSTOM
+			authorizerId: this.authorizerId,
+			authorizerArn: this.authorizerArn
 		};
+
+		this.setupPermissions();
 	}
 }
