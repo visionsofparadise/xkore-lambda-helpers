@@ -80,3 +80,39 @@ it('gets principalId', async () => {
 
 	return;
 });
+
+it('gets cognito username for either auth', async () => {
+	const handler = lambdaWrap<{ userId: string; body: {} }>({ eitherAuth: true }, async e => {
+		return e.userId;
+	});
+
+	const response = await handler(({
+		requestContext: {
+			authorizer: {
+				claims: {
+					sub: 'test'
+				}
+			}
+		}
+	} as unknown) as APIGatewayProxyEvent);
+	expect(response.body).toBe('test');
+
+	return;
+});
+
+it('gets principalId for either auth', async () => {
+	const handler = lambdaWrap<{ userId: string; body: {} }>({ eitherAuth: true }, async e => {
+		return e.userId;
+	});
+
+	const response = await handler(({
+		requestContext: {
+			authorizer: {
+				principalId: 'test'
+			}
+		}
+	} as unknown) as APIGatewayProxyEvent);
+	expect(response.body).toBe('test');
+
+	return;
+});

@@ -13,6 +13,7 @@ interface IConfig {
 	cognitoAuth?: boolean;
 	cognitoClaim?: string;
 	customAuth?: boolean;
+	eitherAuth?: boolean;
 }
 
 interface IEvent {
@@ -36,6 +37,11 @@ export const lambdaWrap = <Params extends TypeParams>(
 
 		if (config && config.cognitoAuth) e.userId = event.requestContext.authorizer!.claims[config.cognitoClaim || 'sub'];
 		if (config && config.customAuth) e.userId = event.requestContext.authorizer!.principalId;
+
+		if (config && config.eitherAuth)
+			e.userId =
+				event.requestContext.authorizer!.principalId ||
+				event.requestContext.authorizer!.claims[config.cognitoClaim || 'sub'];
 
 		const data = await fn(e as IEvent & Params);
 
