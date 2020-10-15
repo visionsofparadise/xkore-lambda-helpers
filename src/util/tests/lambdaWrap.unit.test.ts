@@ -81,8 +81,8 @@ it('gets principalId', async () => {
 	return;
 });
 
-it('gets cognito username for either auth', async () => {
-	const handler = lambdaWrap<{ userId: string; body: {} }>({ eitherAuth: true }, async e => {
+it('gets cognito username for cognitoOrCustom auth', async () => {
+	const handler = lambdaWrap<{ userId: string; body: {} }>({ cognitoOrCustomAuth: true }, async e => {
 		return e.userId;
 	});
 
@@ -100,8 +100,8 @@ it('gets cognito username for either auth', async () => {
 	return;
 });
 
-it('gets principalId for either auth', async () => {
-	const handler = lambdaWrap<{ userId: string; body: {} }>({ eitherAuth: true }, async e => {
+it('gets principalId for cognitoOrCustom auth', async () => {
+	const handler = lambdaWrap<{ userId: string; body: {} }>({ cognitoOrCustomAuth: true }, async e => {
 		return e.userId;
 	});
 
