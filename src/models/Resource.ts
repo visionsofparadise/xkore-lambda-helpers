@@ -62,8 +62,10 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 		this.config = {
 			db: params.config.db,
 
-			hiddenKeys: params.config.hiddenKeys ? [...params.config.hiddenKeys, 'isTestResource'] : ['isTestResource'],
-			ownerKeys: params.config.ownerKeys ? [...params.config.ownerKeys, 'pk', 'sk'] : ['pk', 'sk'],
+			hiddenKeys: params.config.hiddenKeys
+				? [...params.config.hiddenKeys, 'isTestResource', 'pk', 'sk']
+				: ['isTestResource', 'pk', 'sk'],
+			ownerKeys: params.config.ownerKeys || [],
 
 			validationSchema: object({
 				pk: string().required(),
