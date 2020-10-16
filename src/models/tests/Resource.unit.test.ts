@@ -17,21 +17,22 @@ interface Attributes {
 }
 
 class TestResource extends Resource<Attributes> {
-	db = db;
-
-	validationSchema = yup.object({
-		testAttribute: yup.string().required()
-	});
-
-	hiddenKeys: ['testAttribute'];
-	ownerKeys: [];
-
 	constructor(params: Partial<Attributes & BaseResource> & Attributes) {
 		super({
 			pk: params.testAttribute,
 			sk: params.testAttribute,
 			resourceType: 'Test',
-			...params
+			...params,
+
+			config: {
+				db,
+				validationSchema: yup.object({
+					testAttribute: yup.string().required()
+				}),
+
+				hiddenKeys: ['testAttribute'],
+				ownerKeys: []
+			}
 		});
 	}
 }
