@@ -5,6 +5,8 @@ import AWS from 'aws-sdk';
 import { BaseResource } from '../models/Resource';
 
 export class CustomDynamoDBItem extends Construct {
+	public readonly returnData: AwsCustomResource;
+
 	constructor(scope: Construct, id: string, props: { tableName: string; tableArn: string; item: BaseResource }) {
 		super(scope, id);
 
@@ -40,7 +42,7 @@ export class CustomDynamoDBItem extends Construct {
 			}
 		};
 
-		return new AwsCustomResource(this, 'testUserRecord', {
+		this.returnData = new AwsCustomResource(this, 'testUserRecord', {
 			resourceType: 'Custom::DynamoDBUser',
 			policy: AwsCustomResourcePolicy.fromStatements([
 				new PolicyStatement({
