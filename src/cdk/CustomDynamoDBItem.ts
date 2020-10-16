@@ -5,11 +5,7 @@ import AWS from 'aws-sdk';
 import { BaseResource } from '../models/Resource';
 
 export class CustomDynamoDBItem extends Construct {
-	constructor(
-		scope: Construct,
-		id: string,
-		props: { pkKey: string; tableName: string; tableArn: string; item: BaseResource }
-	) {
+	constructor(scope: Construct, id: string, props: { tableName: string; tableArn: string; item: BaseResource }) {
 		super(scope, id);
 
 		const onCreate: AwsSdkCall = {
