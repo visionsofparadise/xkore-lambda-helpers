@@ -40,7 +40,7 @@ export class CustomDynamoDBItem extends Construct {
 			}
 		};
 
-		new AwsCustomResource(this, 'testUserRecord', {
+		return new AwsCustomResource(this, 'testUserRecord', {
 			resourceType: 'Custom::DynamoDBUser',
 			policy: AwsCustomResourcePolicy.fromStatements([
 				new PolicyStatement({
