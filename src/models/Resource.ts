@@ -2,7 +2,8 @@ import { dbClient } from '../util/dbClient';
 import upick from 'upick';
 import uomit from 'uomit';
 import day from 'dayjs';
-import { ObjectSchema, string, number, object } from 'yup';
+import { ObjectSchema, string, number, object, boolean } from 'yup';
+import AWS from 'aws-sdk';
 
 export type ResourcePrimaryKey = {
 	pk: string;
@@ -11,6 +12,7 @@ export type ResourcePrimaryKey = {
 
 export type BaseResource = {
 	resourceType: string;
+	isTestResource?: boolean;
 	createdAt: number;
 	updatedAt: number;
 } & ResourcePrimaryKey;
@@ -20,26 +22,33 @@ export interface ResourceList<Resource extends ResourcePrimaryKey> {
 	LastEvaluatedKey?: ResourcePrimaryKey;
 }
 
-interface Config<Data extends object & BaseResource> {
-	db: ReturnType<typeof dbClient>;
-	validationSchema: ObjectSchema<Data>;
-	hiddenKeys: Array<keyof Data>;
-	ownerKeys: Array<keyof Data>;
-}
-
 export class Resource<Attributes extends object, Data extends Attributes & BaseResource = Attributes & BaseResource> {
-	protected config!: Config<Data>;
 	protected initial: Data;
 	protected current: Data;
 
-	constructor(
-		params: Partial<Data> & {
-			config: Pick<Config<Data>, 'db'> &
-				Partial<Pick<Config<Data>, 'hiddenKeys' | 'ownerKeys'>> & {
-					validationSchema: ObjectSchema<Attributes>;
-				};
-		}
-	) {
+	public db: ReturnType<typeof dbClient> = dbClient(
+		new AWS.DynamoDB.DocumentClient({
+			endpoint: 'localhost:8000',
+			sslEnabled: false,
+			region: 'local-env'
+		}),
+		'test'
+	);
+
+	public baseValidationSchema: ObjectSchema<BaseResource> = object({
+		pk: string().required(),
+		sk: string().required(),
+		resourceType: string().required(),
+		isTestResource: boolean(),
+		createdAt: number().positive().integer().required(),
+		updatedAt: number().positive().integer().required()
+	});
+	public validationSchema: ObjectSchema<Attributes> = object();
+
+	public hiddenKeys: Array<keyof Data> = [];
+	public ownerKeys: Array<keyof Data> = [];
+
+	constructor(params: Pick<Data, 'pk' | 'sk'> & Partial<Data>) {
 		const pk = params.pk;
 		const sk = params.sk || pk;
 		const timestamp = day().unix();
@@ -50,28 +59,11 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 
 			resourceType: params.resourceType || 'Resource',
 			createdAt: params.createdAt || timestamp,
-			updatedAt: params.updatedAt || timestamp,
-
-			...uomit(params, ['config'])
+			updatedAt: params.updatedAt || timestamp
 		} as Data;
 
 		this.initial = data;
 		this.current = data;
-
-		this.config = {
-			db: params.config.db,
-
-			hiddenKeys: params.config.hiddenKeys || [],
-			ownerKeys: params.config.ownerKeys || [],
-
-			validationSchema: object({
-				pk: string().required(),
-				sk: string().required(),
-				resourceType: string().required(),
-				createdAt: number().positive().integer().required(),
-				updatedAt: number().positive().integer().required()
-			}).concat(params.config.validationSchema) as ObjectSchema<Data>
-		};
 	}
 
 	get data() {
@@ -89,11 +81,11 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 	}
 
 	get owner() {
-		return uomit(this.current, this.config.hiddenKeys);
+		return uomit(this.current, this.hiddenKeys);
 	}
 
 	get public() {
-		return uomit(this.current, [...this.config.hiddenKeys, ...this.config.ownerKeys]);
+		return uomit(this.current, [...this.hiddenKeys, ...this.ownerKeys]);
 	}
 
 	get pk() {
@@ -106,7 +98,7 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 
 		await this.validate();
 
-		await this.config.db.put(
+		await this.db.put(
 			{
 				Item: this.current
 			},
@@ -119,13 +111,13 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 	create = async () => this.save(true);
 
 	validate = async () => {
-		await this.config.validationSchema.validate(this.current);
+		await this.baseValidationSchema.concat(this.validationSchema).validate(this.current);
 
 		return this.current;
 	};
 
 	delete = async () => {
-		await this.config.db.delete({
+		await this.db.delete({
 			Key: this.pk
 		});
 

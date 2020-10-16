@@ -1,49 +1,49 @@
 import { response, SUCCESS_200, SUCCESS_NO_CONTENT_204 } from './response';
 import { logger } from '../logger';
 import { APIGatewayEvent } from 'aws-lambda/trigger/api-gateway-proxy';
+import { ObjectSchema } from 'yup';
 
-interface TypeParams {
-	params?: object;
-	body?: object;
-	query?: object;
-	userId?: string;
-}
-
-interface IConfig {
-	cognitoAuth?: boolean;
+interface IConfig<T extends boolean | undefined, V extends {} | undefined> {
+	auth?: T;
 	cognitoClaim?: string;
-	customAuth?: boolean;
-	cognitoOrCustomAuth?: boolean;
+	validationSchema?: ObjectSchema<V>;
 }
 
-interface IEvent {
+interface IEvent<T extends boolean | undefined> {
 	event: APIGatewayEvent;
+	userId: T extends true ? string : undefined;
 }
 
-export const lambdaWrap = <Params extends TypeParams>(
-	config: IConfig | undefined,
-	fn: (e: IEvent & Params) => any
+export const lambdaWrap = <T extends boolean | undefined, V extends {} | undefined>(
+	config: IConfig<T, V>,
+	fn: (e: IEvent<T> & V) => any
 ) => async (event: APIGatewayEvent) => {
 	logger.log({ event });
 
 	try {
 		let e = {
 			event,
-			params: event.pathParameters,
-			body: event.body && JSON.parse(event.body),
-			query: event.queryStringParameters,
 			userId: undefined
 		};
 
-		if (config && config.cognitoAuth) e.userId = event.requestContext.authorizer!.claims[config.cognitoClaim || 'sub'];
-		if (config && config.customAuth) e.userId = event.requestContext.authorizer!.principalId;
-
-		if (config && config.cognitoOrCustomAuth)
+		if (config && config.auth)
 			e.userId =
 				event.requestContext.authorizer!.principalId ||
 				event.requestContext.authorizer!.claims[config.cognitoClaim || 'sub'];
 
-		const data = await fn(e as IEvent & Params);
+		if (config && config.validationSchema) {
+			const data = {
+				params: event.pathParameters,
+				body: event.body && JSON.parse(event.body),
+				query: event.queryStringParameters
+			};
+
+			await config.validationSchema.validate(data);
+
+			Object.assign(e, data);
+		}
+
+		const data = await fn(e as IEvent<T> & V);
 
 		logger.log(data);
 

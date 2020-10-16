@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { response as httpResponse, BAD_REQUEST_400 } from '../response';
 import { lambdaWrap } from '../lambdaWrap';
+import * as yup from 'yup';
 
 it('throws internal server error', async () => {
 	const handler = lambdaWrap({}, async () => {
@@ -46,7 +47,7 @@ it('returns success (no content)', async () => {
 });
 
 it('gets cognito username', async () => {
-	const handler = lambdaWrap<{ userId: string; body: {} }>({ cognitoAuth: true }, async e => {
+	const handler = lambdaWrap({ auth: true }, async e => {
 		return e.userId;
 	});
 
@@ -65,7 +66,7 @@ it('gets cognito username', async () => {
 });
 
 it('gets principalId', async () => {
-	const handler = lambdaWrap<{ userId: string; body: {} }>({ customAuth: true }, async e => {
+	const handler = lambdaWrap({ auth: true }, async e => {
 		return e.userId;
 	});
 
@@ -81,38 +82,78 @@ it('gets principalId', async () => {
 	return;
 });
 
-it('gets cognito username for cognitoOrCustom auth', async () => {
-	const handler = lambdaWrap<{ userId: string; body: {} }>({ cognitoOrCustomAuth: true }, async e => {
-		return e.userId;
-	});
+it('validates and infers type correctly', async () => {
+	const handler = lambdaWrap(
+		{
+			validationSchema: yup.object({
+				body: yup.object({
+					testAttribute: yup.string().required()
+				}),
+				params: yup.object({
+					testAttribute: yup.string().required()
+				}),
+				query: yup.object({
+					testAttribute: yup.string().required()
+				})
+			})
+		},
+		async e => {
+			return e;
+		}
+	);
 
 	const response = await handler(({
-		requestContext: {
-			authorizer: {
-				claims: {
-					sub: 'test'
-				}
-			}
+		body: JSON.stringify({
+			testAttribute: 'test'
+		}),
+		pathParameters: {
+			testAttribute: 'test'
+		},
+		queryStringParameters: {
+			testAttribute: 'test'
 		}
 	} as unknown) as APIGatewayProxyEvent);
-	expect(response.body).toBe('test');
+
+	const data = JSON.parse(response.body);
+
+	expect(data.body.testAttribute).toBe('test');
+	expect(data.params.testAttribute).toBe('test');
+	expect(data.query.testAttribute).toBe('test');
 
 	return;
 });
 
-it('gets principalId for cognitoOrCustom auth', async () => {
-	const handler = lambdaWrap<{ userId: string; body: {} }>({ cognitoOrCustomAuth: true }, async e => {
-		return e.userId;
-	});
-
-	const response = await handler(({
-		requestContext: {
-			authorizer: {
-				principalId: 'test'
-			}
+it('throws on invalidation', async () => {
+	const handler = lambdaWrap(
+		{
+			validationSchema: yup.object({
+				body: yup.object({
+					testAttribute: yup.string().required()
+				}),
+				params: yup.object({
+					testAttribute: yup.string().required()
+				}),
+				query: yup.object({
+					testAttribute: yup.string().required()
+				})
+			})
+		},
+		async e => {
+			return e;
 		}
-	} as unknown) as APIGatewayProxyEvent);
-	expect(response.body).toBe('test');
+	);
+
+	await handler(({
+		body: JSON.stringify({
+			testAttribute: 'test'
+		}),
+		pathParameters: {
+			testAttribute: 'test'
+		},
+		queryStringParameters: {
+			testAttribute: 123
+		}
+	} as unknown) as APIGatewayProxyEvent).catch(err => expect(err).toBeDefined());
 
 	return;
 });
