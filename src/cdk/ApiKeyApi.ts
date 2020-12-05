@@ -1,10 +1,11 @@
 import { RestApi } from '@aws-cdk/aws-apigateway';
-import { IFunction } from '@aws-cdk/aws-lambda';
-import { Construct } from '@aws-cdk/core';
+import { CfnPermission, IFunction } from '@aws-cdk/aws-lambda';
+import { Arn, Construct, Stack } from '@aws-cdk/core';
 import { Api, ApiProps } from './Api';
 import { ApiKeyAuthorizer } from './ApiKeyAuthorizer';
 
 export interface ApiKeyApiProps extends ApiProps {
+	readonly stack: Stack;
 	readonly handler: IFunction;
 }
 
@@ -21,5 +22,21 @@ export class ApiKeyApi extends Api {
 		});
 
 		this.apiKeyApi = this.api;
+
+		if (props.stack) {
+			new CfnPermission(this, 'authorizerPermission', {
+				action: 'lambda:InvokeFunction',
+				principal: 'apigateway.amazonaws.com',
+				functionName: props.handler.functionArn,
+				sourceArn: Arn.format(
+					{
+						service: 'execute-api',
+						resource: this.api.restApiId,
+						resourceName: 'authorizers/*'
+					},
+					props.stack
+				)
+			});
+		}
 	}
 }
