@@ -5,7 +5,7 @@ import { Api, ApiProps } from './Api';
 import { ApiKeyAuthorizer } from './ApiKeyAuthorizer';
 
 export interface ApiKeyApiProps extends ApiProps {
-	readonly stack: Stack;
+	readonly stack?: Stack;
 	readonly handler: IFunction;
 }
 
