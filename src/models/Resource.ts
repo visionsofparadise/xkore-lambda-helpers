@@ -3,6 +3,7 @@ import upick from 'upick';
 import uomit from 'uomit';
 import day from 'dayjs';
 import { ObjectSchema, string, number, object, boolean } from 'yup';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 export type ResourcePrimaryKey = {
 	pk: string;
@@ -21,68 +22,50 @@ export interface ResourceList<Resource extends ResourcePrimaryKey> {
 	LastEvaluatedKey?: ResourcePrimaryKey;
 }
 
-interface Config<Data extends object & BaseResource> {
-	db: ReturnType<typeof dbClient>;
-	validationSchema: ObjectSchema<Data>;
-	hiddenKeys: Array<keyof Data>;
-	ownerKeys: Array<keyof Data>;
-}
+export class Resource<
+	AddedAttributes extends object,
+	Attributes extends BaseResource = AddedAttributes & BaseResource
+> {
+	public static resourceType: string = 'Resource';
 
-export class Resource<Attributes extends object, Data extends Attributes & BaseResource = Attributes & BaseResource> {
-	protected config!: Config<Data>;
-	protected initial: Data;
-	protected current: Data;
+	protected db: ReturnType<typeof dbClient>;
+	protected validationSchema: ObjectSchema<BaseResource> = object({
+		pk: string().required(),
+		sk: string().required(),
+		resourceType: string().default(Resource.resourceType).required(),
+		isTestResource: boolean(),
+		createdAt: number().positive().integer().default(day().unix()).required(),
+		updatedAt: number().positive().integer().default(day().unix()).required()
+	});
+	protected hiddenKeys: Array<keyof Attributes> = [];
+	protected ownerKeys: Array<keyof Attributes> = [];
 
-	constructor(
-		params: Partial<Data> & {
-			config: Pick<Config<Data>, 'db'> &
-				Partial<Pick<Config<Data>, 'hiddenKeys' | 'ownerKeys'>> & {
-					validationSchema: ObjectSchema<Attributes>;
-				};
-		}
-	) {
-		const pk = params.pk;
-		const sk = params.sk || pk;
-		const timestamp = day().unix();
+	protected initial: Attributes;
+	protected current: Attributes;
 
-		const data = {
-			pk,
-			sk,
-
-			resourceType: params.resourceType || 'Resource',
-			createdAt: params.createdAt || timestamp,
-			updatedAt: params.updatedAt || timestamp,
-
-			...uomit(params, ['config'])
-		} as Data;
-
-		this.initial = data;
-		this.current = data;
-
-		this.config = {
-			db: params.config.db,
-
-			hiddenKeys: params.config.hiddenKeys
-				? [...params.config.hiddenKeys, 'isTestResource', 'pk', 'sk']
-				: ['isTestResource', 'pk', 'sk'],
-			ownerKeys: params.config.ownerKeys || [],
-
-			validationSchema: object({
-				pk: string().required(),
-				sk: string().required(),
-				resourceType: string().required(),
-				isTestResource: boolean(),
-				createdAt: number().positive().integer().required(),
-				updatedAt: number().positive().integer().required()
-			}).concat(params.config.validationSchema) as ObjectSchema<Data>
+	constructor(props: {
+		attributes: Attributes;
+		config: {
+			db: DocumentClient;
+			validationSchema: ObjectSchema<AddedAttributes>;
+			hiddenKeys: Array<keyof Attributes>;
+			ownerKeys: Array<keyof Attributes>;
 		};
+	}) {
+		this.db = dbClient(props.config.db, process.env.DYNAMODB_TABLE!);
+		this.validationSchema = this.validationSchema.concat(props.config.validationSchema);
+		this.hiddenKeys = [...props.config.hiddenKeys, ...this.hiddenKeys];
+		this.ownerKeys = [...props.config.ownerKeys, ...this.ownerKeys];
+
+		this.initial = props.attributes;
+		this.current = props.attributes;
 	}
 
 	get data() {
 		return this.current;
 	}
 
-	set(data: Partial<Data>) {
+	set(data: Partial<Attributes>) {
 		this.current = { ...this.current, ...data };
 
 		return;
@@ -93,11 +76,11 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 	}
 
 	get owner() {
-		return uomit(this.current, this.config.hiddenKeys);
+		return uomit(this.current, this.hiddenKeys);
 	}
 
 	get public() {
-		return uomit(this.current, [...this.config.hiddenKeys, ...this.config.ownerKeys]);
+		return uomit(this.current, [...this.hiddenKeys, ...this.ownerKeys]);
 	}
 
 	get pk() {
@@ -110,7 +93,7 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 
 		await this.validate();
 
-		await this.config.db.put(
+		await this.db.put(
 			{
 				Item: this.current
 			},
@@ -123,13 +106,13 @@ export class Resource<Attributes extends object, Data extends Attributes & BaseR
 	create = async () => this.save(true);
 
 	validate = async () => {
-		await this.config.validationSchema.validate(this.current);
+		await this.validationSchema.validate(this.current);
 
 		return this.current;
 	};
 
 	delete = async () => {
-		await this.config.db.delete({
+		await this.db.delete({
 			Key: this.pk
 		});
 

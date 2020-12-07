@@ -1,8 +1,9 @@
 import { BaseResource, Resource } from '../Resource';
-import * as yup from 'yup';
-import { dbClient } from '../../util/dbClient';
 import AWS from 'aws-sdk';
 import { nanoid } from 'nanoid';
+import { InferType, object, string } from 'yup';
+import day from 'dayjs';
+import { dbClient } from '../../util/dbClient';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
 	endpoint: 'localhost:8000',
@@ -12,22 +13,28 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 
 const db = dbClient(documentClient, 'test');
 
-interface Attributes {
-	testAttribute: string;
-}
+const validationSchema = object({
+	testAttribute: string().required()
+});
 
-class TestResource extends Resource<Attributes> {
-	constructor(params: Partial<Attributes & BaseResource> & Attributes) {
+class TestResource extends Resource<InferType<typeof validationSchema>> {
+	public static resourceType = 'TestResource';
+
+	constructor(params: Omit<TestResource['initial'], keyof BaseResource>) {
 		super({
-			pk: params.testAttribute,
-			sk: params.testAttribute,
-			resourceType: 'Test',
-			...params,
+			attributes: {
+				pk: nanoid(),
+				sk: TestResource.resourceType,
+				resourceType: TestResource.resourceType,
+				createdAt: day().unix(),
+				updatedAt: day().unix(),
+				...params
+			},
 
 			config: {
-				db,
-				validationSchema: yup.object({
-					testAttribute: yup.string().required()
+				db: documentClient,
+				validationSchema: object({
+					testAttribute: string().required()
 				}),
 
 				hiddenKeys: ['testAttribute'],
