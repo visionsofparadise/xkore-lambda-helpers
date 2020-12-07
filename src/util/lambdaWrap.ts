@@ -26,21 +26,23 @@ export const lambdaWrap = <T extends boolean | undefined, V extends {} | undefin
 			userId: undefined
 		};
 
-		if (config && config.auth)
-			e.userId =
-				event.requestContext.authorizer!.principalId ||
-				event.requestContext.authorizer!.claims[config.cognitoClaim || 'sub'];
+		if (config) {
+			if (config.auth)
+				e.userId =
+					event.requestContext.authorizer!.principalId ||
+					event.requestContext.authorizer!.claims[config.cognitoClaim || 'sub'];
 
-		if (config && config.validationSchema) {
-			const data = {
-				params: event.pathParameters,
-				body: event.body && JSON.parse(event.body),
-				query: event.queryStringParameters
-			};
+			if (config.validationSchema) {
+				const data = {
+					params: event.pathParameters,
+					body: event.body && JSON.parse(event.body),
+					query: event.queryStringParameters
+				};
 
-			await config.validationSchema.validate(data);
+				await config.validationSchema.validate(data);
 
-			Object.assign(e, data);
+				Object.assign(e, data);
+			}
 		}
 
 		const data = await fn(e as IEvent<T> & V);
