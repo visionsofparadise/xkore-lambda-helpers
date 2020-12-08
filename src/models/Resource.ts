@@ -3,7 +3,6 @@ import upick from 'upick';
 import uomit from 'uomit';
 import day from 'dayjs';
 import { ObjectSchema, string, number, object, boolean } from 'yup';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 export type ResourcePrimaryKey = {
 	pk: string;
@@ -46,13 +45,13 @@ export class Resource<
 	constructor(props: {
 		attributes: Attributes;
 		config: {
-			db: DocumentClient;
+			db: ReturnType<typeof dbClient>;
 			validationSchema: ObjectSchema<AddedAttributes>;
 			hiddenKeys: Array<keyof Attributes>;
 			ownerKeys: Array<keyof Attributes>;
 		};
 	}) {
-		this.db = dbClient(props.config.db, process.env.DYNAMODB_TABLE!);
+		this.db = props.config.db;
 		this.validationSchema = this.validationSchema.concat(props.config.validationSchema);
 		this.hiddenKeys = [...props.config.hiddenKeys, ...this.hiddenKeys];
 		this.ownerKeys = [...props.config.ownerKeys, ...this.ownerKeys];

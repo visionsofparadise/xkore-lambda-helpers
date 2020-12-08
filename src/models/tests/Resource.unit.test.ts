@@ -32,7 +32,7 @@ class TestResource extends Resource<InferType<typeof validationSchema>> {
 			},
 
 			config: {
-				db: documentClient,
+				db,
 				validationSchema: object({
 					testAttribute: string().required()
 				}),
