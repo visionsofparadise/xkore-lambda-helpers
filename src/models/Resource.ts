@@ -25,16 +25,16 @@ export class Resource<
 	AddedAttributes extends object,
 	Attributes extends BaseResource = AddedAttributes & BaseResource
 > {
-	public static resourceType: string = 'Resource';
+	public static resourceType = Resource.name;
 
 	protected db: ReturnType<typeof dbClient>;
 	protected validationSchema: ObjectSchema<BaseResource> = object({
 		pk: string().required(),
 		sk: string().required(),
-		resourceType: string().default(Resource.resourceType).required(),
+		resourceType: string().default(Resource.resourceType),
 		isTestResource: boolean(),
-		createdAt: number().positive().integer().default(day().unix()).required(),
-		updatedAt: number().positive().integer().default(day().unix()).required()
+		createdAt: number().positive().integer().default(day().unix()),
+		updatedAt: number().positive().integer().default(day().unix())
 	});
 	protected hiddenKeys: Array<keyof Attributes> = [];
 	protected ownerKeys: Array<keyof Attributes> = [];
@@ -43,7 +43,7 @@ export class Resource<
 	protected current: Attributes;
 
 	constructor(props: {
-		attributes: Attributes;
+		attributes: Omit<Attributes, 'createdAt' | 'updatedAt' | 'resourceType'> & Partial<Attributes>;
 		config: {
 			db: ReturnType<typeof dbClient>;
 			validationSchema: ObjectSchema<AddedAttributes>;
@@ -56,8 +56,15 @@ export class Resource<
 		this.hiddenKeys = [...props.config.hiddenKeys, ...this.hiddenKeys];
 		this.ownerKeys = [...props.config.ownerKeys, ...this.ownerKeys];
 
-		this.initial = props.attributes;
-		this.current = props.attributes;
+		const attributes = {
+			...props.attributes,
+			createdAt: props.attributes.createdAt || day().unix(),
+			updatedAt: props.attributes.updatedAt || day().unix(),
+			resourceType: props.attributes.resourceType || Resource.resourceType
+		} as Attributes;
+
+		this.initial = attributes;
+		this.current = attributes;
 	}
 
 	get data() {

@@ -18,16 +18,11 @@ const validationSchema = object({
 });
 
 class TestResource extends Resource<InferType<typeof validationSchema>> {
-	public static resourceType = 'TestResource';
-
 	constructor(params: Omit<TestResource['initial'], keyof BaseResource>) {
 		super({
 			attributes: {
 				pk: nanoid(),
 				sk: TestResource.resourceType,
-				resourceType: TestResource.resourceType,
-				createdAt: day().unix(),
-				updatedAt: day().unix(),
 				...params
 			},
 
