@@ -2,7 +2,6 @@ import { BaseResource, Resource } from '../Resource';
 import AWS from 'aws-sdk';
 import { nanoid } from 'nanoid';
 import { InferType, object, string } from 'yup';
-import day from 'dayjs';
 import { dbClient } from '../../util/dbClient';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
@@ -18,11 +17,14 @@ const validationSchema = object({
 });
 
 class TestResource extends Resource<InferType<typeof validationSchema>> {
+	public static resourceType = 'TestResource';
+
 	constructor(params: Omit<TestResource['initial'], keyof BaseResource>) {
 		super({
 			attributes: {
 				pk: nanoid(),
-				sk: TestResource.resourceType,
+				sk: 'TestResource',
+				resourceType: TestResource.resourceType,
 				...params
 			},
 
@@ -47,6 +49,7 @@ it('creates resource', async () => {
 	});
 
 	expect(getData).toStrictEqual(testData.data);
+	expect(testData.data.resourceType).toBe('TestResource');
 });
 
 it('saves data to resource', async () => {

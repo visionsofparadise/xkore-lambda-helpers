@@ -25,7 +25,7 @@ export class Resource<
 	AddedAttributes extends object,
 	Attributes extends BaseResource = AddedAttributes & BaseResource
 > {
-	public static resourceType = Resource.name;
+	public static resourceType = 'Resource';
 
 	protected db: ReturnType<typeof dbClient>;
 	protected validationSchema: ObjectSchema<BaseResource> = object({
