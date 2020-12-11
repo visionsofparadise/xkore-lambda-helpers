@@ -11,7 +11,7 @@ export type ResourcePrimaryKey = {
 
 export type BaseResource = {
 	resourceType: string;
-	isTestResource?: boolean;
+	isSystemResource?: boolean;
 	createdAt: number;
 	updatedAt: number;
 } & ResourcePrimaryKey;
@@ -32,7 +32,7 @@ export class Resource<
 		pk: string().required(),
 		sk: string().required(),
 		resourceType: string().default(Resource.resourceType),
-		isTestResource: boolean(),
+		isSystemResource: boolean(),
 		createdAt: number().positive().integer().default(day().unix()),
 		updatedAt: number().positive().integer().default(day().unix())
 	});
