@@ -1,29 +1,31 @@
 {
 	"name": "xkore-lambda-helpers",
-	"version": "1.0.38",
+	"version": "1.1.0",
 	"main": "./dist/index.js",
 	"scripts": {
+		"compile": "tsc",
 		"patch": "tsc && jest unit && npm version patch && npm publish"
 	},
 	"dependencies": {
 		"@types/aws-lambda": "^8.10.63",
 		"@types/node": "^13.13.25",
-		"@types/yup": "^0.26.32",
+		"ajv": "^7.0.0",
 		"dayjs": "^1.9.1",
 		"envlog": "^1.0.3",
 		"uomit": "^1.0.0",
-		"upick": "^1.0.0",
-		"yup": "^0.28.3"
+		"upick": "^1.0.0"
 	},
 	"devDependencies": {
-		"@aws-cdk/aws-apigateway": "^1.67.0",
-		"@aws-cdk/aws-iam": "^1.67.0",
-		"@aws-cdk/aws-lambda": "^1.67.0",
-		"@aws-cdk/core": "^1.67.0",
-		"@aws-cdk/custom-resources": "^1.67.0",
+		"@aws-cdk/aws-apigateway": "^1.79.0",
+		"@aws-cdk/aws-events": "^1.79.0",
+		"@aws-cdk/aws-events-targets": "^1.79.0",
+		"@aws-cdk/aws-iam": "^1.79.0",
+		"@aws-cdk/aws-lambda": "^1.79.0",
+		"@aws-cdk/core": "^1.79.0",
+		"@aws-cdk/custom-resources": "^1.79.0",
 		"@shelf/jest-dynamodb": "^1.7.0",
 		"@types/jest": "^24.9.1",
-		"aws-cdk": "^1.67.0",
+		"aws-cdk": "^1.79.0",
 		"aws-lambda": "^1.0.6",
 		"aws-sdk": "^2.770.0",
 		"jest": "^24.9.0",
@@ -37,11 +39,14 @@
 	},
 	"peerDependencies": {
 		"aws-sdk": "^2.759.0",
-		"aws-cdk": "^1.67.0",
-		"@aws-cdk/aws-apigateway": "^1.67.0",
-		"@aws-cdk/custom-resources": "^1.67.0",
-		"@aws-cdk/aws-lambda": "^1.67.0",
-		"@aws-cdk/core": "^1.67.0"
+		"aws-cdk": "^1.79.0",
+		"@aws-cdk/aws-iam": "^1.79.0",
+		"@aws-cdk/aws-apigateway": "^1.79.0",
+		"@aws-cdk/aws-events": "^1.79.0",
+		"@aws-cdk/aws-events-targets": "^1.79.0",
+		"@aws-cdk/custom-resources": "^1.79.0",
+		"@aws-cdk/aws-lambda": "^1.79.0",
+		"@aws-cdk/core": "^1.79.0"
 	},
 	"author": "xKore",
 	"license": "MIT",

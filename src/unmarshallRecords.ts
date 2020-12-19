@@ -1,7 +1,7 @@
 import { DynamoDBRecord } from 'aws-lambda/trigger/dynamodb-stream';
 import { Converter } from 'aws-sdk/clients/dynamodb';
-import { logger } from '../logger';
-import { BaseResource } from '../models/Resource';
+import { logger } from './logger';
+import { IResource } from './Resource';
 
 export type Records<OldResource, NewResource> = Array<Record<OldResource, NewResource>>;
 
@@ -10,10 +10,7 @@ export interface Record<OldResource, NewResource> {
 	oldRecord: OldResource;
 }
 
-export const unmarshallRecords = <
-	OldResource extends BaseResource | undefined,
-	NewResource extends BaseResource | undefined
->(
+export const unmarshallRecords = <OldResource extends IResource | undefined, NewResource extends IResource | undefined>(
 	records: Array<DynamoDBRecord>
 ): Records<OldResource, NewResource> =>
 	records.map(r => {

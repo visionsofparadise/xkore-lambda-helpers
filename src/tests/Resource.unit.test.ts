@@ -1,8 +1,7 @@
-import { BaseResource, Resource } from '../Resource';
 import AWS from 'aws-sdk';
 import { nanoid } from 'nanoid';
-import { InferType, object, string } from 'yup';
-import { dbClient } from '../../util/dbClient';
+import { dbClient } from '../dbClient';
+import { TestResource } from './TestResource';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
 	endpoint: 'localhost:8000',
@@ -12,34 +11,25 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 
 const db = dbClient(documentClient, 'test');
 
-const validationSchema = object({
-	testAttribute: string().required()
+it('validates resource', async () => {
+	const testData = new TestResource({ testAttribute: nanoid() });
+
+	const result = testData.validate();
+
+	expect(result).toBe(true);
 });
 
-class TestResource extends Resource<InferType<typeof validationSchema>> {
-	public static resourceType = 'TestResource';
+it('throws on invalid resource', async () => {
+	expect.assertions(1);
 
-	constructor(params: Omit<TestResource['initial'], keyof BaseResource>) {
-		super({
-			attributes: {
-				pk: nanoid(),
-				sk: 'TestResource',
-				resourceType: TestResource.resourceType,
-				...params
-			},
+	const testData = new TestResource({ testAttribute: (123 as unknown) as string });
 
-			config: {
-				db,
-				validationSchema: object({
-					testAttribute: string().required()
-				}),
-
-				hiddenKeys: ['testAttribute'],
-				ownerKeys: []
-			}
-		});
+	try {
+		testData.validate();
+	} catch (err) {
+		expect(err).toBeDefined();
 	}
-}
+});
 
 it('creates resource', async () => {
 	const testData = await new TestResource({ testAttribute: nanoid() }).create();

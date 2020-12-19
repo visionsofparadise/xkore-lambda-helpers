@@ -1,32 +1,28 @@
-import { logger } from '../logger';
+import { logger } from './logger';
 
-interface Params {
+export interface IResponse {
 	statusCode: number;
 	body?: any;
 	headers?: Required<{}>;
 }
 
-export interface Response {
-	statusCode: number;
-	body: any;
-	headers: Required<{}>;
-}
+export class Response implements IResponse {
+	public statusCode: number;
+	public body: any;
+	public headers: Required<{}>;
 
-export const response = ({ statusCode, body, headers }: Params): Response => {
-	const response = {
-		statusCode,
-		body: typeof body === 'string' ? body : JSON.stringify(body),
-		headers: {
+	constructor(props: IResponse) {
+		logger.info({ response: props });
+
+		this.statusCode = props.statusCode;
+		this.body = typeof props.body === 'string' ? props.body : JSON.stringify(props.body);
+		this.headers = {
 			'Access-Control-Allow-Origin': '*',
 			'Content-Type': 'application/json',
-			...headers
-		}
-	};
-
-	statusCode < 400 ? logger.log(response) : logger.log(response);
-
-	return response;
-};
+			...props.headers
+		};
+	}
+}
 
 export const SUCCESS_200 = (body: any) => ({ statusCode: 200, body });
 export const SUCCESS_NO_CONTENT_204 = { statusCode: 204 };

@@ -11,7 +11,7 @@
 		"outDir": "dist",
 		"baseUrl": ".",
 		"paths": {
-			"*": ["node_modules/*", "src/helpers/types/d/*"]
+			"*": ["node_modules/*", "src/types/d/*"]
 		},
 		"esModuleInterop": true,
 		"removeComments": true,
@@ -36,5 +36,5 @@
 		]
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": ["dist/*", "src/**/*.test.ts", "node_modules/*"]
+	"exclude": ["dist/*", "src/**/*.test.ts", "node_modules"]
 }

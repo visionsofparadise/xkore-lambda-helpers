@@ -1,10 +1,19 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { response as httpResponse, BAD_REQUEST_400 } from '../response';
-import { lambdaWrap } from '../lambdaWrap';
-import * as yup from 'yup';
+import { Response, BAD_REQUEST_400 } from '../response';
+import { HttpLambdaHandler } from '../HttpLambdaHandler';
+import { testSchema } from './testSchema';
+
+const createTestHandler = (handler: (e: any) => any, props?: any) =>
+	new HttpLambdaHandler(
+		{
+			method: 'GET',
+			...props
+		},
+		handler
+	).handler;
 
 it('throws internal server error', async () => {
-	const handler = lambdaWrap({}, async () => {
+	const handler = createTestHandler(async () => {
 		throw new Error();
 	});
 
@@ -14,8 +23,8 @@ it('throws internal server error', async () => {
 });
 
 it('returns client error', async () => {
-	const handler = lambdaWrap({}, async () => {
-		throw httpResponse(BAD_REQUEST_400('test'));
+	const handler = createTestHandler(async () => {
+		throw new Response(BAD_REQUEST_400('test'));
 	});
 
 	const response = await handler({} as APIGatewayProxyEvent);
@@ -25,7 +34,7 @@ it('returns client error', async () => {
 });
 
 it('returns success', async () => {
-	const handler = lambdaWrap({}, async () => {
+	const handler = createTestHandler(async () => {
 		return 'success';
 	});
 
@@ -36,7 +45,7 @@ it('returns success', async () => {
 });
 
 it('returns success (no content)', async () => {
-	const handler = lambdaWrap({}, async () => {
+	const handler = createTestHandler(async () => {
 		return;
 	});
 
@@ -47,9 +56,12 @@ it('returns success (no content)', async () => {
 });
 
 it('gets cognito username', async () => {
-	const handler = lambdaWrap({ auth: true }, async e => {
-		return e.userId;
-	});
+	const handler = createTestHandler(
+		async e => {
+			return e.userId;
+		},
+		{ authorizer: true }
+	);
 
 	const response = await handler(({
 		requestContext: {
@@ -66,9 +78,12 @@ it('gets cognito username', async () => {
 });
 
 it('gets principalId', async () => {
-	const handler = lambdaWrap({ auth: true }, async e => {
-		return e.userId;
-	});
+	const handler = createTestHandler(
+		async e => {
+			return e.userId;
+		},
+		{ authorizer: true }
+	);
 
 	const response = await handler(({
 		requestContext: {
@@ -83,32 +98,24 @@ it('gets principalId', async () => {
 });
 
 it('validates and infers type correctly', async () => {
-	const handler = lambdaWrap(
-		{
-			validationSchema: yup.object({
-				body: yup.object({
-					testAttribute: yup.string().required()
-				}),
-				params: yup.object({
-					testAttribute: yup.string().required()
-				}),
-				query: yup.object({
-					testAttribute: yup.string().required()
-				})
-			})
-		},
+	const handler = createTestHandler(
 		async e => {
 			return e;
+		},
+		{
+			paramSchema: testSchema,
+			bodySchema: testSchema,
+			querySchema: testSchema
 		}
 	);
 
 	const response = await handler(({
-		body: JSON.stringify({
-			testAttribute: 'test'
-		}),
 		pathParameters: {
 			testAttribute: 'test'
 		},
+		body: JSON.stringify({
+			testAttribute: 'test'
+		}),
 		queryStringParameters: {
 			testAttribute: 'test'
 		}
@@ -116,30 +123,24 @@ it('validates and infers type correctly', async () => {
 
 	const data = JSON.parse(response.body);
 
-	expect(data.body.testAttribute).toBe('test');
+	console.log({ response });
+
 	expect(data.params.testAttribute).toBe('test');
+	expect(data.body.testAttribute).toBe('test');
 	expect(data.query.testAttribute).toBe('test');
 
 	return;
 });
 
 it('throws on invalidation', async () => {
-	const handler = lambdaWrap(
-		{
-			validationSchema: yup.object({
-				body: yup.object({
-					testAttribute: yup.string().required()
-				}),
-				params: yup.object({
-					testAttribute: yup.string().required()
-				}),
-				query: yup.object({
-					testAttribute: yup.string().required()
-				})
-			})
-		},
+	const handler = createTestHandler(
 		async e => {
 			return e;
+		},
+		{
+			paramSchema: testSchema,
+			bodySchema: testSchema,
+			querySchema: testSchema
 		}
 	);
 

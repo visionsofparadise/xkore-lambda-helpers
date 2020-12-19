@@ -2,12 +2,18 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId, AwsSdkC
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 import { Construct } from '@aws-cdk/core';
 import AWS from 'aws-sdk';
-import { BaseResource } from '../models/Resource';
+import { IResource } from '../Resource';
+
+export interface CustomDynamoDBItemProps {
+	tableName: string;
+	tableArn: string;
+	item: IResource;
+}
 
 export class CustomDynamoDBItem extends Construct {
 	public readonly returnData: AwsCustomResource;
 
-	constructor(scope: Construct, id: string, props: { tableName: string; tableArn: string; item: BaseResource }) {
+	constructor(scope: Construct, id: string, props: CustomDynamoDBItemProps) {
 		super(scope, id);
 
 		const onCreate: AwsSdkCall = {
