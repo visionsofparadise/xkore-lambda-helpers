@@ -1,17 +1,17 @@
 import { Construct } from '@aws-cdk/core';
-import { EventGeneric } from '../Event';
+import { Event as EventClass } from '../Event';
 import { ISchemaPart, SchemaPart } from '../SchemaPart';
 import { HasSchema } from './Schema';
 
-export interface EventProps {
-	Event: EventGeneric;
+export interface EventProps<Detail extends object> {
+	Event: EventClass<Detail>;
 	tags?: Array<string>;
 }
 
-export class Event extends Construct implements HasSchema {
-	public Event: EventGeneric;
+export class Event<Detail extends object> extends Construct implements HasSchema {
+	public Event: EventClass<Detail>;
 
-	constructor(scope: Construct, id: string, props: EventProps) {
+	constructor(scope: Construct, id: string, props: EventProps<Detail>) {
 		super(scope, id);
 
 		this.Event = props.Event;
