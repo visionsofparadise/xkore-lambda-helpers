@@ -257,7 +257,9 @@ it('resets and deletes all non system data', async () => {
 
 	const scan2 = await db.scan();
 
-	expect(scan2.Items!.length).toBe(0);
+	const nonSystemItems = scan2.Items!.filter((item: any) => !item.isSystemResource);
+
+	expect(nonSystemItems.length).toBe(0);
 });
 
 it('resets and does not delete system data', async () => {
@@ -277,5 +279,8 @@ it('resets and does not delete system data', async () => {
 
 	const { Items } = await db.scan();
 
-	expect(Items!.length).toBe(1);
+	const nonSystemItems = Items!.filter((item: any) => !item.isSystemResource);
+
+	expect(Items!.length).toBeGreaterThan(0);
+	expect(nonSystemItems.length).toBe(0);
 });
