@@ -2,7 +2,7 @@ import { JSONSchemaType } from 'ajv';
 import { EventBridge } from 'aws-sdk';
 import { logger } from './logger';
 
-export type EventGeneric = Event<object>;
+export type EventGeneric = Event<any>;
 
 export class Event<Detail extends object> {
 	public tags: Array<string>;
