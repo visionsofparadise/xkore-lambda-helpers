@@ -51,6 +51,7 @@ export class SchemaPart extends Resource<ISchemaPart> {
 				pk: params.pk || SchemaPart.schema.$id!,
 				sk: params.sk || `${params.stage}-${id}`,
 				id,
+				isSystemResource: true,
 				resourceType: params.resourceType || SchemaPart.schema.$id!,
 				tags: params.tags || []
 			},
