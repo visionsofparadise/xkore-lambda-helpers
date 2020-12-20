@@ -1,12 +1,12 @@
 import { Construct } from '@aws-cdk/core';
 import { ISchemaPart, SchemaPart } from '../SchemaPart';
-import { CustomDynamoDBItem, CustomDynamoDBItemProps } from './CustomDynamoDBItem';
+import { CustomDynamoDBItems, CustomDynamoDBItemsProps } from './CustomDynamoDBItems';
 
 export interface HasSchema {
 	createSchemaParts: (props: Pick<ISchemaPart, 'service' | 'stage' | 'group'>) => Array<SchemaPart>;
 }
 
-export interface SchemaLoaderProps extends Omit<CustomDynamoDBItemProps, 'item'> {
+export interface SchemaLoaderProps extends Omit<CustomDynamoDBItemsProps, 'item'> {
 	service: string;
 	stage: string;
 	schemaGroups: Array<{
@@ -17,7 +17,7 @@ export interface SchemaLoaderProps extends Omit<CustomDynamoDBItemProps, 'item'>
 
 export class SchemaLoader extends Construct {
 	public schemaParts: Array<SchemaPart>;
-	public customResources: Array<CustomDynamoDBItem>;
+	public customResource: CustomDynamoDBItems;
 
 	constructor(scope: Construct, id: string, props: SchemaLoaderProps) {
 		super(scope, id);
@@ -38,17 +38,11 @@ export class SchemaLoader extends Construct {
 
 		this.schemaParts = schemaParts;
 
-		const customResources = [];
+		const customResource = new CustomDynamoDBItems(this, 'SchemaItems', {
+			...props,
+			items: schemaParts.map(schemaPart => schemaPart.data)
+		});
 
-		for (const schemaPart of schemaParts) {
-			const customResource = new CustomDynamoDBItem(this, `${schemaPart.data.id}Item`, {
-				...props,
-				item: schemaPart.data
-			});
-
-			customResources.push(customResource);
-		}
-
-		this.customResources = customResources;
+		this.customResource = customResource;
 	}
 }
