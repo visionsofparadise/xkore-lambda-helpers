@@ -15,8 +15,8 @@ export class CustomDynamoDBItems extends Construct {
 	constructor(scope: Construct, id: string, props: CustomDynamoDBItemsProps) {
 		super(scope, id);
 
-		const requestItems = (requestType: string) =>
-			new CfnJson(this, 'JSONTableNameToken', {
+		const requestItems = (requestType: string, id: string) =>
+			new CfnJson(this, 'JSONTokenKey' + id, {
 				value: {
 					[props.tableName]: props.items.map(item => ({
 						[requestType]: {
@@ -26,27 +26,35 @@ export class CustomDynamoDBItems extends Construct {
 				}
 			});
 
+		const callDefaults = {
+			service: 'DynamoDB',
+			action: 'batchWriteItem'
+		};
+
 		const onCreate: AwsSdkCall = {
 			physicalResourceId: PhysicalResourceId.of(props.tableName + '-' + id),
-			service: 'DynamoDB',
-			action: 'batchWriteItem',
+			...callDefaults,
 			parameters: {
-				RequestItems: requestItems('PutRequest')
+				RequestItems: requestItems('PutRequest', 'Create')
 			}
 		};
 
-		const { physicalResourceId, ...onUpdate } = onCreate;
+		const onUpdate: AwsSdkCall = {
+			...callDefaults,
+			parameters: {
+				RequestItems: requestItems('PutRequest', 'Update')
+			}
+		};
 
 		const onDelete: AwsSdkCall = {
-			service: 'DynamoDB',
-			action: 'batchWriteItem',
+			...callDefaults,
 			parameters: {
-				RequestItems: requestItems('DeleteRequest')
+				RequestItems: requestItems('DeleteRequest', 'Delete')
 			}
 		};
 
-		this.returnData = new AwsCustomResource(this, 'testUserRecord', {
-			resourceType: 'Custom::DynamoDBUser',
+		this.returnData = new AwsCustomResource(this, id + 'CustomResource', {
+			resourceType: 'Custom::' + id,
 			policy: AwsCustomResourcePolicy.fromStatements([
 				new PolicyStatement({
 					effect: Effect.ALLOW,

@@ -38,7 +38,7 @@ export class SchemaLoader extends Construct {
 
 		this.schemaParts = schemaParts;
 
-		const customResource = new CustomDynamoDBItems(this, 'SchemaItems', {
+		const customResource = new CustomDynamoDBItems(this, 'SchemaPartsItems', {
 			...props,
 			items: schemaParts.map(schemaPart => schemaPart.data)
 		});

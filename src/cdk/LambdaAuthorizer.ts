@@ -31,7 +31,7 @@ export abstract class LambdaAuthorizer extends Authorizer implements IAuthorizer
 
 	protected setupPermissions() {
 		if (!this.role) {
-			this.handler.addPermission(`${this.node.uniqueId}:Permissions`, {
+			this.handler.addPermission(`${this.node.addr}:Permissions`, {
 				principal: new ServicePrincipal('apigateway.amazonaws.com'),
 				sourceArn: this.authorizerArn
 			});
