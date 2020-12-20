@@ -15,43 +15,33 @@ export class CustomDynamoDBItems extends Construct {
 	constructor(scope: Construct, id: string, props: CustomDynamoDBItemsProps) {
 		super(scope, id);
 
-		const tableName = new CfnJson(this, 'JSONTableNameToken', {
-			value: props.tableName
-		});
+		const requestItems = (requestType: string) =>
+			new CfnJson(this, 'JSONTableNameToken', {
+				value: {
+					[props.tableName]: props.items.map(item => ({
+						[requestType]: {
+							Item: item
+						}
+					}))
+				}
+			});
 
 		const onCreate: AwsSdkCall = {
 			physicalResourceId: PhysicalResourceId.of(props.tableName + '-' + id),
 			service: 'DynamoDB',
 			action: 'batchWriteItem',
 			parameters: {
-				TableName: props.tableName,
-				RequestItems: {
-					[tableName.toString()]: props.items.map(item => ({
-						PutRequest: {
-							Item: item
-						}
-					}))
-				}
+				RequestItems: requestItems('PutRequest')
 			}
 		};
 
-		const onUpdate: AwsSdkCall = onCreate;
+		const { physicalResourceId, ...onUpdate } = onCreate;
 
 		const onDelete: AwsSdkCall = {
 			service: 'DynamoDB',
 			action: 'batchWriteItem',
 			parameters: {
-				TableName: props.tableName,
-				RequestItems: {
-					[tableName.toString()]: props.items.map(item => ({
-						DeleteRequest: {
-							Key: {
-								pk: item.pk,
-								sk: item.sk
-							}
-						}
-					}))
-				}
+				RequestItems: requestItems('DeleteRequest')
 			}
 		};
 
