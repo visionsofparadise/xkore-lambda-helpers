@@ -6,7 +6,7 @@ export interface HasSchema {
 	createSchemaParts: (props: Pick<ISchemaPart, 'service' | 'stage' | 'group'>) => Array<SchemaPart>;
 }
 
-export interface SchemaLoaderProps extends Omit<CustomDynamoDBItemsProps, 'items'> {
+export interface SchemaLoaderProps extends Omit<CustomDynamoDBItemsProps, 'items' | 'physicalResourceId'> {
 	service: string;
 	stage: string;
 	schemaGroups: Array<{
