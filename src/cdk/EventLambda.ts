@@ -4,7 +4,7 @@ import { EventLambdaHandlerGeneric } from '../EventLambdaHandler';
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 import { ISchemaPart, SchemaPart } from '../SchemaPart';
 import { Rule } from '@aws-cdk/aws-events';
-import { HasSchema } from './Schema';
+import { HasSchema } from './SchemaLoader';
 
 export interface EventLambdaProps extends FunctionProps {
 	EventLambdaHandler: EventLambdaHandlerGeneric;

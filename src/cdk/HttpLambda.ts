@@ -3,7 +3,7 @@ import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
 import { HttpLambdaHandlerGeneric } from '../HttpLambdaHandler';
 import { IResource, LambdaIntegration, MethodOptions } from '@aws-cdk/aws-apigateway';
 import { ISchemaPart, SchemaPart } from '../SchemaPart';
-import { HasSchema } from './Schema';
+import { HasSchema } from './SchemaLoader';
 
 export interface HttpLambdaProps extends FunctionProps {
 	HttpLambdaHandler: HttpLambdaHandlerGeneric;

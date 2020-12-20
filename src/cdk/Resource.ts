@@ -1,7 +1,7 @@
 import { Construct } from '@aws-cdk/core';
 import { Resource as ResourceModel } from '../Resource';
 import { ISchemaPart, SchemaPart } from '../SchemaPart';
-import { HasSchema } from './Schema';
+import { HasSchema } from './SchemaLoader';
 
 export interface ResourceProps {
 	Resource: typeof ResourceModel;

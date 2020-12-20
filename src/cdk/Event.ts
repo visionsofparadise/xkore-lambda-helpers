@@ -1,7 +1,7 @@
 import { Construct } from '@aws-cdk/core';
 import { Event as EventClass } from '../Event';
 import { ISchemaPart, SchemaPart } from '../SchemaPart';
-import { HasSchema } from './Schema';
+import { HasSchema } from './SchemaLoader';
 
 export interface EventProps<Detail extends object> {
 	Event: EventClass<Detail>;
