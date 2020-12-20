@@ -1,6 +1,6 @@
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId, AwsSdkCall } from '@aws-cdk/custom-resources';
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
-import { Construct } from '@aws-cdk/core';
+import { CfnJson, Construct } from '@aws-cdk/core';
 import { IResource } from '../Resource';
 
 export interface CustomDynamoDBItemsProps {
@@ -15,6 +15,10 @@ export class CustomDynamoDBItems extends Construct {
 	constructor(scope: Construct, id: string, props: CustomDynamoDBItemsProps) {
 		super(scope, id);
 
+		const tableName = new CfnJson(this, 'JSONTableNameToken', {
+			value: props.tableName
+		});
+
 		const onCreate: AwsSdkCall = {
 			physicalResourceId: PhysicalResourceId.of(props.tableName + '-' + id),
 			service: 'DynamoDB',
@@ -22,7 +26,7 @@ export class CustomDynamoDBItems extends Construct {
 			parameters: {
 				TableName: props.tableName,
 				RequestItems: {
-					[props.tableName]: props.items.map(item => ({
+					[tableName.toString()]: props.items.map(item => ({
 						PutRequest: {
 							Item: item
 						}
@@ -39,7 +43,7 @@ export class CustomDynamoDBItems extends Construct {
 			parameters: {
 				TableName: props.tableName,
 				RequestItems: {
-					[props.tableName]: props.items.map(item => ({
+					[tableName.toString()]: props.items.map(item => ({
 						DeleteRequest: {
 							Key: {
 								pk: item.pk,
