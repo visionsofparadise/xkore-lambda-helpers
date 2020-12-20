@@ -31,8 +31,10 @@ export class CustomDynamoDBItems extends Construct {
 			action: 'batchWriteItem'
 		};
 
+		const physicalResourceId = PhysicalResourceId.of(props.tableName + '-' + id);
+
 		const onCreate: AwsSdkCall = {
-			physicalResourceId: PhysicalResourceId.of(props.tableName + '-' + id),
+			physicalResourceId,
 			...callDefaults,
 			parameters: {
 				RequestItems: requestItems('PutRequest', 'Create')
@@ -40,6 +42,7 @@ export class CustomDynamoDBItems extends Construct {
 		};
 
 		const onUpdate: AwsSdkCall = {
+			physicalResourceId,
 			...callDefaults,
 			parameters: {
 				RequestItems: requestItems('PutRequest', 'Update')
