@@ -40,6 +40,7 @@ export class SchemaLoader extends Construct {
 
 		const customResource = new CustomDynamoDBItems(this, 'SchemaPartsItems', {
 			...props,
+			physicalResourceId: [props.service, props.stage, 'schemaParts'].join('-'),
 			items: schemaParts.map(schemaPart => schemaPart.data)
 		});
 

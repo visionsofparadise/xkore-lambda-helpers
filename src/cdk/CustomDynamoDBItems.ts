@@ -4,6 +4,7 @@ import { CfnJson, Construct } from '@aws-cdk/core';
 import { IResource } from '../Resource';
 
 export interface CustomDynamoDBItemsProps {
+	physicalResourceId: string;
 	tableName: string;
 	tableArn: string;
 	items: Array<IResource>;
@@ -31,7 +32,7 @@ export class CustomDynamoDBItems extends Construct {
 			action: 'batchWriteItem'
 		};
 
-		const physicalResourceId = PhysicalResourceId.of(props.tableName + '-' + id);
+		const physicalResourceId = PhysicalResourceId.of(props.physicalResourceId);
 
 		const onCreate: AwsSdkCall = {
 			physicalResourceId,
