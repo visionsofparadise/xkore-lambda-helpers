@@ -1,3 +1,5 @@
+import { Construct } from '@aws-cdk/core';
+import { masterOutput } from './createOutput';
 import { ISchemaPart, SchemaPart } from '../SchemaPart';
 
 export interface HasSchema {
@@ -13,11 +15,14 @@ export interface SchemaLoaderProps {
 	}>;
 }
 
-export class SchemaLoader {
+export class SchemaLoader extends Construct {
 	public schemaParts: Array<SchemaPart>;
-	public itemsJSON: string;
+	public json: Array<string> = [];
+	public jsonParts: number = 0;
 
-	constructor(props: SchemaLoaderProps) {
+	constructor(scope: Construct, id: string, props: SchemaLoaderProps) {
+		super(scope, id);
+
 		let schemaParts: Array<SchemaPart> = [];
 
 		for (const group of props.schemaGroups) {
@@ -33,6 +38,20 @@ export class SchemaLoader {
 		}
 
 		this.schemaParts = schemaParts;
-		this.itemsJSON = JSON.stringify(schemaParts.map(schemaPart => schemaPart.data));
+
+		const json = JSON.stringify(schemaParts.map(schemaPart => schemaPart.data));
+
+		for (let i = 0; i < json.length; i + 1000) {
+			this.json.push(json.slice(i, i + 1000));
+			this.jsonParts = this.jsonParts + 1;
+		}
+
+		const createOutput = masterOutput(this, `${props.service}-${props.stage}`);
+
+		for (let i = 0; i < this.json.length; i++) {
+			createOutput(`schemaJSONData-${i}`, this.json[i]);
+		}
+
+		createOutput(`schemaJSONParts`, this.jsonParts.toString());
 	}
 }
