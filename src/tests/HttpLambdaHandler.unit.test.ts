@@ -103,7 +103,7 @@ it('validates and infers type correctly', async () => {
 			return e;
 		},
 		{
-			paramJSONSchema: testJSONSchema,
+			paramsJSONSchema: testJSONSchema,
 			bodyJSONSchema: testJSONSchema,
 			queryJSONSchema: testJSONSchema
 		}
