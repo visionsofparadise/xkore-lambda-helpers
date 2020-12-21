@@ -40,7 +40,6 @@ export class DocumentationItems extends Construct {
 		const documentationItemsData = documentationItems.map(documentation => documentation.data);
 
 		new SystemItems(this, 'DocumentationItems', {
-			physicalResourceId: [props.service, props.stage, 'documentationItems'].join('-'),
 			tableArn: props.tableArn,
 			tableName: props.tableName,
 			items: documentationItemsData

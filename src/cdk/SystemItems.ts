@@ -4,7 +4,6 @@ import { Construct } from '@aws-cdk/core';
 import { IItem } from '../Item';
 
 export interface SystemItemsProps {
-	physicalResourceId: string;
 	tableName: string;
 	tableArn: string;
 	items: Array<IItem>;
@@ -16,8 +15,9 @@ export class SystemItems extends Construct {
 	constructor(scope: Construct, id: string, props: SystemItemsProps) {
 		super(scope, id);
 
-		for (const item of props.items) {
-			const physicalResourceId = PhysicalResourceId.of(props.physicalResourceId);
+		for (let i = 0; i < props.items.length; i++) {
+			const item = props.items[i];
+			const physicalResourceId = PhysicalResourceId.of(id + i);
 			const TableName = props.tableName;
 
 			const onCreate: AwsSdkCall = {
@@ -52,7 +52,7 @@ export class SystemItems extends Construct {
 			};
 
 			this.returnData.push(
-				new AwsCustomResource(this, id + 'CustomResource', {
+				new AwsCustomResource(this, id + 'CustomResource' + i, {
 					resourceType: 'Custom::' + id,
 					policy: AwsCustomResourcePolicy.fromStatements([
 						new PolicyStatement({
