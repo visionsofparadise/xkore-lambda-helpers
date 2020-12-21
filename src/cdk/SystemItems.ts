@@ -1,6 +1,6 @@
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId, AwsSdkCall } from '@aws-cdk/custom-resources';
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
-import { CfnJson, Construct } from '@aws-cdk/core';
+import { Construct } from '@aws-cdk/core';
 import { IItem } from '../Item';
 
 export interface SystemItemsProps {
@@ -11,77 +11,61 @@ export interface SystemItemsProps {
 }
 
 export class SystemItems extends Construct {
-	public readonly returnData: AwsCustomResource;
+	public readonly returnData: Array<AwsCustomResource> = [];
 
 	constructor(scope: Construct, id: string, props: SystemItemsProps) {
 		super(scope, id);
 
-		const putItems = new CfnJson(this, 'PutJSONTokenKey', {
-			value: {
-				[props.tableName]: props.items.map(item => ({
-					PutRequest: {
-						Item: item
-					}
-				}))
-			}
-		});
+		for (const item of props.items) {
+			const physicalResourceId = PhysicalResourceId.of(props.physicalResourceId);
+			const TableName = props.tableName;
 
-		const callDefaults = {
-			service: 'DynamoDB',
-			action: 'batchWriteItem'
-		};
+			const onCreate: AwsSdkCall = {
+				physicalResourceId,
+				service: 'DynamoDB',
+				action: 'putItem',
+				parameters: {
+					TableName,
+					Item: item
+				}
+			};
 
-		const physicalResourceId = PhysicalResourceId.of(props.physicalResourceId);
+			const onUpdate: AwsSdkCall = {
+				physicalResourceId,
+				service: 'DynamoDB',
+				action: 'putItem',
+				parameters: {
+					TableName,
+					Item: item
+				}
+			};
 
-		const onCreate: AwsSdkCall = {
-			physicalResourceId,
-			...callDefaults,
-			parameters: {
-				RequestItems: putItems
-			}
-		};
+			const { pk, sk } = item;
 
-		const onUpdate: AwsSdkCall = {
-			physicalResourceId,
-			...callDefaults,
-			parameters: {
-				RequestItems: putItems
-			}
-		};
+			const onDelete: AwsSdkCall = {
+				service: 'DynamoDB',
+				action: 'deleteItem',
+				parameters: {
+					TableName,
+					Key: { pk, sk }
+				}
+			};
 
-		const deleteItems = new CfnJson(this, 'DeleteJSONTokenKey', {
-			value: {
-				[props.tableName]: props.items.map(item => {
-					const { pk, sk } = item;
-
-					return {
-						DeleteRequest: {
-							Item: { pk, sk }
-						}
-					};
+			this.returnData.push(
+				new AwsCustomResource(this, id + 'CustomResource', {
+					resourceType: 'Custom::' + id,
+					policy: AwsCustomResourcePolicy.fromStatements([
+						new PolicyStatement({
+							effect: Effect.ALLOW,
+							resources: [props.tableArn],
+							actions: ['dynamodb:PutItem', 'dynamodb:DeleteItem']
+						})
+					]),
+					onCreate,
+					onUpdate,
+					onDelete
 				})
-			}
-		});
-
-		const onDelete: AwsSdkCall = {
-			...callDefaults,
-			parameters: {
-				RequestItems: deleteItems
-			}
-		};
-
-		this.returnData = new AwsCustomResource(this, id + 'CustomResource', {
-			resourceType: 'Custom::' + id,
-			policy: AwsCustomResourcePolicy.fromStatements([
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					resources: [props.tableArn],
-					actions: ['dynamodb:PutItem', 'dynamodb:DeleteItem']
-				})
-			]),
-			onCreate,
-			onUpdate,
-			onDelete
-		});
+			);
+		}
 	}
 }
