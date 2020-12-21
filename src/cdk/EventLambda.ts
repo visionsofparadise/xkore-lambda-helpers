@@ -1,4 +1,4 @@
-import { Construct } from '@aws-cdk/core';
+import { Construct, Stack } from '@aws-cdk/core';
 import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
 import { EventLambdaHandlerGeneric } from '../EventLambdaHandler';
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
@@ -31,14 +31,25 @@ export class EventLambda extends Function implements Documented {
 		});
 	}
 
-	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => [
-		new Documentation({
-			...props,
-			id: this.node.id,
-			type: 'event',
-			jsonSchemas: this.EventLambdaHandler.detailJSONSchema
-				? [{ schemaName: 'eventDetail', schemaJSON: JSON.stringify(this.EventLambdaHandler.detailJSONSchema) }]
-				: []
-		})
-	];
+	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
+		const stack = Stack.of(this);
+
+		return [
+			new Documentation({
+				...props,
+				id: this.node.id,
+				type: 'event',
+				jsonSchemas: this.EventLambdaHandler.detailJSONSchema
+					? [
+							{
+								schemaName: 'eventDetail',
+								schemaJSON: stack.toJsonString({
+									value: this.EventLambdaHandler.detailJSONSchema
+								})
+							}
+					  ]
+					: []
+			})
+		];
+	};
 }

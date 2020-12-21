@@ -1,4 +1,4 @@
-import { Construct } from '@aws-cdk/core';
+import { Construct, Stack } from '@aws-cdk/core';
 import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
 import { HttpLambdaHandlerGeneric } from '../HttpLambdaHandler';
 import { IResource, LambdaIntegration, MethodOptions } from '@aws-cdk/aws-apigateway';
@@ -35,13 +35,34 @@ export class HttpLambda extends Function implements Documented {
 	}
 
 	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
+		const stack = Stack.of(this);
 		const documentation = [];
 
 		const jsonSchemas = [
-			{ schemaName: 'params', schemaJSON: JSON.stringify(this.HttpLambdaHandler.paramsJSONSchema) },
-			{ schemaName: 'body', schemaJSON: JSON.stringify(this.HttpLambdaHandler.bodyJSONSchema) },
-			{ schemaName: 'query', schemaJSON: JSON.stringify(this.HttpLambdaHandler.queryJSONSchema) },
-			{ schemaName: 'response', schemaJSON: JSON.stringify(this.HttpLambdaHandler.responseJSONSchema) }
+			{
+				schemaName: 'params',
+				schemaJSON: stack.toJsonString({
+					value: this.HttpLambdaHandler.paramsJSONSchema
+				})
+			},
+			{
+				schemaName: 'body',
+				schemaJSON: stack.toJsonString({
+					value: this.HttpLambdaHandler.bodyJSONSchema
+				})
+			},
+			{
+				schemaName: 'query',
+				schemaJSON: stack.toJsonString({
+					value: this.HttpLambdaHandler.queryJSONSchema
+				})
+			},
+			{
+				schemaName: 'response',
+				schemaJSON: stack.toJsonString({
+					value: this.HttpLambdaHandler.responseJSONSchema
+				})
+			}
 		];
 
 		for (const integration of this.integrations) {
