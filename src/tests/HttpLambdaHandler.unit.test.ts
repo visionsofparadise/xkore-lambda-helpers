@@ -138,7 +138,7 @@ it('throws on invalidation', async () => {
 			return e;
 		},
 		{
-			paramSchema: testJSONSchema,
+			paramsSchema: testJSONSchema,
 			bodySchema: testJSONSchema,
 			querySchema: testJSONSchema
 		}
