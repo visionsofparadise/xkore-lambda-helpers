@@ -16,16 +16,15 @@ export class SystemItems extends Construct {
 	constructor(scope: Construct, id: string, props: SystemItemsProps) {
 		super(scope, id);
 
-		const requestItems = (requestType: string, id: string) =>
-			new CfnJson(this, 'JSONTokenKey' + id, {
-				value: {
-					[props.tableName]: props.items.map(item => ({
-						[requestType]: {
-							Item: item
-						}
-					}))
-				}
-			});
+		const putItems = new CfnJson(this, 'PutJSONTokenKey', {
+			value: {
+				[props.tableName]: props.items.map(item => ({
+					PutRequest: {
+						Item: item
+					}
+				}))
+			}
+		});
 
 		const callDefaults = {
 			service: 'DynamoDB',
@@ -38,7 +37,7 @@ export class SystemItems extends Construct {
 			physicalResourceId,
 			...callDefaults,
 			parameters: {
-				RequestItems: requestItems('PutRequest', 'Create')
+				RequestItems: putItems
 			}
 		};
 
@@ -46,14 +45,28 @@ export class SystemItems extends Construct {
 			physicalResourceId,
 			...callDefaults,
 			parameters: {
-				RequestItems: requestItems('PutRequest', 'Update')
+				RequestItems: putItems
 			}
 		};
+
+		const deleteItems = new CfnJson(this, 'DeleteJSONTokenKey', {
+			value: {
+				[props.tableName]: props.items.map(item => {
+					const { pk, sk } = item;
+
+					return {
+						DeleteRequest: {
+							Item: { pk, sk }
+						}
+					};
+				})
+			}
+		});
 
 		const onDelete: AwsSdkCall = {
 			...callDefaults,
 			parameters: {
-				RequestItems: requestItems('DeleteRequest', 'Delete')
+				RequestItems: deleteItems
 			}
 		};
 
