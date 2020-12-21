@@ -1,12 +1,12 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { logger } from './logger';
-import { IPrimaryKey, IResource } from './Resource';
+import { IPrimaryKey, IItem } from './Item';
 import { Response, BAD_REQUEST_400 } from './Response';
 
 type WithDefaults<I> = Omit<I, 'TableName'>;
 
-export interface ResourceList<Resource extends IPrimaryKey> {
-	Items?: Array<Resource> | undefined;
+export interface ItemList<Item extends IPrimaryKey> {
+	Items?: Array<Item> | undefined;
 	LastEvaluatedKey?: IPrimaryKey;
 }
 
@@ -48,7 +48,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 					logger.error({ error });
 
 					if (error.code === 'ConditionalCheckFailedException' && isNew) {
-						throw new Response(BAD_REQUEST_400('Resource already exists'));
+						throw new Response(BAD_REQUEST_400('Item already exists'));
 					}
 
 					throw error;
@@ -78,7 +78,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		query: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.QueryInput>) => {
 			logger.info({ query });
 
-			const data = (await docDB.query({ ...queryDefaults, ...query }).promise()) as ResourceList<Data>;
+			const data = (await docDB.query({ ...queryDefaults, ...query }).promise()) as ItemList<Data>;
 
 			logger.info({ data });
 
@@ -88,7 +88,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		scan: async <Data extends IPrimaryKey>(query?: WithDefaults<DocumentClient.ScanInput>) => {
 			logger.info({ query });
 
-			return (docDB.scan({ ...queryDefaults, ...query }).promise() as unknown) as ResourceList<Data>;
+			return (docDB.scan({ ...queryDefaults, ...query }).promise() as unknown) as ItemList<Data>;
 		},
 
 		delete: async (query: WithDefaults<DocumentClient.DeleteItemInput>) => {
@@ -104,14 +104,14 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		},
 
 		reset: async () => {
-			const scanData = await client.scan<IResource & { isSystemResource?: boolean }>({
-				ProjectionExpression: 'pk, sk, isSystemResource'
+			const scanData = await client.scan<IItem & { isSystemItem?: boolean }>({
+				ProjectionExpression: 'pk, sk, isSystemItem'
 			});
 
 			logger.info(scanData);
 
 			for (const data of scanData.Items!) {
-				if (!data.isSystemResource) {
+				if (!data.isSystemItem) {
 					logger.info('deleting item');
 					logger.info(data);
 

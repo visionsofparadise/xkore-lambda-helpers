@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { Response, BAD_REQUEST_400 } from '../response';
 import { HttpLambdaHandler } from '../HttpLambdaHandler';
-import { testSchema } from './testSchema';
+import { testJSONSchema } from './testJSONSchema';
 
 const createTestHandler = (handler: (e: any) => any, props?: any) =>
 	new HttpLambdaHandler(
@@ -103,9 +103,9 @@ it('validates and infers type correctly', async () => {
 			return e;
 		},
 		{
-			paramSchema: testSchema,
-			bodySchema: testSchema,
-			querySchema: testSchema
+			paramSchema: testJSONSchema,
+			bodySchema: testJSONSchema,
+			querySchema: testJSONSchema
 		}
 	);
 
@@ -138,9 +138,9 @@ it('throws on invalidation', async () => {
 			return e;
 		},
 		{
-			paramSchema: testSchema,
-			bodySchema: testSchema,
-			querySchema: testSchema
+			paramSchema: testJSONSchema,
+			bodySchema: testJSONSchema,
+			querySchema: testJSONSchema
 		}
 	);
 

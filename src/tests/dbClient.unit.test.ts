@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 import upick from 'upick';
-import { IResource } from '../Resource';
+import { IItem } from '../Item';
 import { dbClient } from '../dbClient';
 import { nanoid } from 'nanoid';
 
@@ -60,7 +60,7 @@ it('puts item', async () => {
 			TableName: 'test',
 			Key: upick(input, ['pk', 'sk'])
 		})
-		.promise()) as unknown) as { Item: typeof input & IResource };
+		.promise()) as unknown) as { Item: typeof input & IItem };
 
 	expect(upick(Item, ['pk', 'sk', 'testAttribute'])).toStrictEqual(input);
 });
@@ -88,7 +88,7 @@ it('updates an attribute on an item', async () => {
 			TableName: 'test',
 			Key: upick(input, ['pk', 'sk'])
 		})
-		.promise()) as unknown) as { Item: typeof input & IResource };
+		.promise()) as unknown) as { Item: typeof input & IItem };
 
 	expect(Item.testAttribute).toBe('updated');
 });
@@ -120,7 +120,7 @@ it('updates attributes on an item', async () => {
 			TableName: 'test',
 			Key: upick(input, ['pk', 'sk'])
 		})
-		.promise()) as unknown) as { Item: typeof input & IResource };
+		.promise()) as unknown) as { Item: typeof input & IItem };
 
 	expect(Item.testAttribute).toBe('updated');
 	expect(Item.testAttribute2).toBe('updated');
@@ -149,7 +149,7 @@ it('removes attributes off an item', async () => {
 			TableName: 'test',
 			Key: upick(input, ['pk', 'sk'])
 		})
-		.promise()) as unknown) as { Item: typeof input & IResource };
+		.promise()) as unknown) as { Item: typeof input & IItem };
 
 	expect(Item.testAttribute).not.toBeDefined();
 	expect(Item.testAttribute2).not.toBeDefined();
@@ -257,7 +257,7 @@ it('resets and deletes all non system data', async () => {
 
 	const scan2 = await db.scan();
 
-	const nonSystemItems = scan2.Items!.filter((item: any) => !item.isSystemResource);
+	const nonSystemItems = scan2.Items!.filter((item: any) => !item.isSystemItem);
 
 	expect(nonSystemItems.length).toBe(0);
 });
@@ -270,7 +270,7 @@ it('resets and does not delete system data', async () => {
 			TableName: 'test',
 			Item: {
 				...input,
-				isSystemResource: true
+				isSystemItem: true
 			}
 		})
 		.promise();
@@ -279,7 +279,7 @@ it('resets and does not delete system data', async () => {
 
 	const { Items } = await db.scan();
 
-	const nonSystemItems = Items!.filter((item: any) => !item.isSystemResource);
+	const nonSystemItems = Items!.filter((item: any) => !item.isSystemItem);
 
 	expect(Items!.length).toBeGreaterThan(0);
 	expect(nonSystemItems.length).toBe(0);

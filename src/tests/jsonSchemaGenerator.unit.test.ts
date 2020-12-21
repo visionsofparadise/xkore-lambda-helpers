@@ -1,7 +1,7 @@
-import { testSchema } from './testSchema';
+import { testJSONSchema } from './testJSONSchema';
 import { ajv } from '../ajv';
 
-const validate = ajv.compile(testSchema);
+const validate = ajv.compile(testJSONSchema);
 
 it('generates valid schema', () => {
 	const result = validate({ testAttribute: 'test' });

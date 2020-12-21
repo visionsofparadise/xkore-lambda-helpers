@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import { nanoid } from 'nanoid';
 import { dbClient } from '../dbClient';
-import { TestResource } from './TestResource';
+import { TestItem } from './TestItem';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
 	endpoint: 'localhost:8000',
@@ -12,7 +12,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 const db = dbClient(documentClient, 'test');
 
 it('validates resource', async () => {
-	const testData = new TestResource({ testAttribute: nanoid() });
+	const testData = new TestItem({ testAttribute: nanoid() });
 
 	const result = testData.validate();
 
@@ -22,7 +22,7 @@ it('validates resource', async () => {
 it('throws on invalid resource', async () => {
 	expect.assertions(1);
 
-	const testData = new TestResource({ testAttribute: (123 as unknown) as string });
+	const testData = new TestItem({ testAttribute: (123 as unknown) as string });
 
 	try {
 		testData.validate();
@@ -32,18 +32,18 @@ it('throws on invalid resource', async () => {
 });
 
 it('creates resource', async () => {
-	const testData = await new TestResource({ testAttribute: nanoid() }).create();
+	const testData = await new TestItem({ testAttribute: nanoid() }).create();
 
 	const getData = await db.get({
 		Key: testData.pk
 	});
 
 	expect(getData).toStrictEqual(testData.data);
-	expect(testData.data.resourceType).toBe('TestResource');
+	expect(testData.data.resourceType).toBe('TestItem');
 });
 
 it('saves data to resource', async () => {
-	const testData = new TestResource({ testAttribute: nanoid() });
+	const testData = new TestItem({ testAttribute: nanoid() });
 
 	await documentClient
 		.put({
@@ -66,11 +66,11 @@ it('saves data to resource', async () => {
 });
 
 it('save fails if resource doesnt exist', async () => {
-	await new TestResource({ testAttribute: nanoid() }).save().catch(err => expect(err).toBeDefined());
+	await new TestItem({ testAttribute: nanoid() }).save().catch(err => expect(err).toBeDefined());
 });
 
 it('deletes resource', async () => {
-	const testData = new TestResource({ testAttribute: nanoid() });
+	const testData = new TestItem({ testAttribute: nanoid() });
 
 	await documentClient
 		.put({

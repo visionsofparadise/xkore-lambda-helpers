@@ -8,20 +8,20 @@ export class Event<Detail extends object> {
 	public tags: Array<string>;
 	public readonly source: string;
 	public readonly detailType: string;
-	public readonly detailSchema: JSONSchemaType<Detail>;
+	public readonly detailJSONSchema: JSONSchemaType<Detail>;
 	protected readonly _eventbridge: EventBridge;
 
 	constructor(params: {
 		source: string;
 		tags?: Array<string>;
 		detailType: string;
-		detailSchema: JSONSchemaType<Detail>;
+		detailJSONSchema: JSONSchemaType<Detail>;
 		eventbridge: EventBridge;
 	}) {
 		(this.tags = params.tags || []),
 			(this.source = params.source),
 			(this.detailType = params.detailType),
-			(this.detailSchema = params.detailSchema),
+			(this.detailJSONSchema = params.detailJSONSchema),
 			(this._eventbridge = params.eventbridge);
 	}
 

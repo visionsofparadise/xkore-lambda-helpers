@@ -1,14 +1,14 @@
 import { Construct } from '@aws-cdk/core';
 import { Event as EventClass } from '../Event';
-import { ISchemaPart, SchemaPart } from '../SchemaPart';
-import { HasSchema } from './SchemaLoader';
+import { IDocumentation, Documentation } from '../Documentation';
+import { Documented } from './DocumentationItems';
 
 export interface EventProps<Detail extends object> {
 	Event: EventClass<Detail>;
 	tags?: Array<string>;
 }
 
-export class Event<Detail extends object> extends Construct implements HasSchema {
+export class Event<Detail extends object> extends Construct implements Documented {
 	public Event: EventClass<Detail>;
 
 	constructor(scope: Construct, id: string, props: EventProps<Detail>) {
@@ -19,11 +19,14 @@ export class Event<Detail extends object> extends Construct implements HasSchema
 		if (props.tags) this.Event.tags = [...this.Event.tags, ...props.tags];
 	}
 
-	public createSchemaParts = (props: Pick<ISchemaPart, 'service' | 'stage' | 'group'>) => [
-		new SchemaPart({
+	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => [
+		new Documentation({
 			...props,
 			id: this.node.id,
-			schemas: this.Event.detailSchema ? [JSON.stringify(this.Event.detailSchema)] : []
+			type: 'event',
+			jsonSchemas: this.Event.detailJSONSchema
+				? [{ schemaName: 'event-detail', schemaJSON: JSON.stringify(this.Event.detailJSONSchema) }]
+				: []
 		})
 	];
 }

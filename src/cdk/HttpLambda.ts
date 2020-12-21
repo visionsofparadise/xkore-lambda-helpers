@@ -2,8 +2,8 @@ import { Construct } from '@aws-cdk/core';
 import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
 import { HttpLambdaHandlerGeneric } from '../HttpLambdaHandler';
 import { IResource, LambdaIntegration, MethodOptions } from '@aws-cdk/aws-apigateway';
-import { ISchemaPart, SchemaPart } from '../SchemaPart';
-import { HasSchema } from './SchemaLoader';
+import { IDocumentation, Documentation } from '../Documentation';
+import { Documented } from './DocumentationItems';
 
 export interface HttpLambdaProps extends FunctionProps {
 	HttpLambdaHandler: HttpLambdaHandlerGeneric;
@@ -14,7 +14,7 @@ export interface HttpLambdaProps extends FunctionProps {
 	tags?: Array<string>;
 }
 
-export class HttpLambda extends Function implements HasSchema {
+export class HttpLambda extends Function implements Documented {
 	public HttpLambdaHandler: HttpLambdaHandlerGeneric;
 	public integrations: Array<{
 		resource: IResource;
@@ -34,30 +34,29 @@ export class HttpLambda extends Function implements HasSchema {
 		}
 	}
 
-	public createSchemaParts = (props: Pick<ISchemaPart, 'service' | 'stage' | 'group'>) => {
-		const schemaParts = [];
+	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
+		const documentation = [];
+
+		const jsonSchemas = [
+			{ schemaName: 'params', schemaJSON: JSON.stringify(this.HttpLambdaHandler.paramsJSONSchema) },
+			{ schemaName: 'body', schemaJSON: JSON.stringify(this.HttpLambdaHandler.bodyJSONSchema) },
+			{ schemaName: 'query', schemaJSON: JSON.stringify(this.HttpLambdaHandler.queryJSONSchema) },
+			{ schemaName: 'response', schemaJSON: JSON.stringify(this.HttpLambdaHandler.responseJSONSchema) }
+		];
 
 		for (const integration of this.integrations) {
-			const schemasAndUndefined = [
-				this.HttpLambdaHandler.paramSchema,
-				this.HttpLambdaHandler.bodySchema,
-				this.HttpLambdaHandler.querySchema,
-				this.HttpLambdaHandler.responseSchema
-			];
-			const schemas = schemasAndUndefined.filter(schema => schema !== undefined);
-			const JSONSchemas = schemas.map(schema => JSON.stringify(schema));
-
-			schemaParts.push(
-				new SchemaPart({
+			documentation.push(
+				new Documentation({
 					...props,
 					id: this.node.id,
-					schemas: JSONSchemas,
+					type: 'endpoint',
+					jsonSchemas,
 					method: this.HttpLambdaHandler.method,
 					path: integration.resource.path
 				})
 			);
 		}
 
-		return schemaParts;
+		return documentation;
 	};
 }

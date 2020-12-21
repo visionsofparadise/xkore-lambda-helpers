@@ -1,12 +1,12 @@
 import { EventBridgeEvent } from 'aws-lambda';
 import { EventLambdaHandler } from '../EventLambdaHandler';
-import { testSchema } from './testSchema';
+import { testJSONSchema } from './testJSONSchema';
 
 const createTestHandler = (handler: (e: any) => any) =>
 	new EventLambdaHandler(
 		{
 			detailType: ['test'],
-			detailSchema: testSchema
+			detailJSONSchema: testJSONSchema
 		},
 		handler
 	).handler;

@@ -39,10 +39,10 @@ export class HttpLambdaHandler<
 	protected _queryValidator?: ValidateFunction<JSONSchemaType<Query>>;
 	protected _handlerFn: (e: HttpLambdaEvent<Params, Body, Query, Authorizer>) => any | Promise<any>;
 
-	public paramSchema?: JSONSchemaType<Params>;
-	public bodySchema?: JSONSchemaType<Body>;
-	public querySchema?: JSONSchemaType<Query>;
-	public responseSchema?: JSONSchemaType<Response>;
+	public paramsJSONSchema?: JSONSchemaType<Params>;
+	public bodyJSONSchema?: JSONSchemaType<Body>;
+	public queryJSONSchema?: JSONSchemaType<Query>;
+	public responseJSONSchema?: JSONSchemaType<Response>;
 	public tags: Array<string>;
 	public method: 'POST' | 'GET' | 'DELETE' | 'PUT' | 'PATCH';
 
@@ -50,10 +50,10 @@ export class HttpLambdaHandler<
 		config: {
 			authorizer?: Authorizer;
 			cognitoClaim?: string;
-			paramSchema?: JSONSchemaType<Params>;
-			bodySchema?: JSONSchemaType<Body>;
-			querySchema?: JSONSchemaType<Query>;
-			responseSchema?: JSONSchemaType<Response>;
+			paramsJSONSchema?: JSONSchemaType<Params>;
+			bodyJSONSchema?: JSONSchemaType<Body>;
+			queryJSONSchema?: JSONSchemaType<Query>;
+			responseJSONSchema?: JSONSchemaType<Response>;
 			method: 'POST' | 'GET' | 'DELETE' | 'PUT' | 'PATCH';
 			tags?: Array<string>;
 		},
@@ -63,15 +63,15 @@ export class HttpLambdaHandler<
 		this._cognitoClaim = config.cognitoClaim;
 		this._handlerFn = handler;
 
-		this.paramSchema = config.paramSchema;
-		this.bodySchema = config.bodySchema;
-		this.querySchema = config.querySchema;
+		this.paramsJSONSchema = config.paramsJSONSchema;
+		this.bodyJSONSchema = config.bodyJSONSchema;
+		this.queryJSONSchema = config.queryJSONSchema;
 		this.tags = config.tags || [];
 		this.method = config.method;
 
-		if (this.paramSchema) this._paramValidator = ajv.compile(this.paramSchema!);
-		if (this.bodySchema) this._bodyValidator = ajv.compile(this.bodySchema!);
-		if (this.querySchema) this._queryValidator = ajv.compile(this.querySchema!);
+		if (this.paramsJSONSchema) this._paramValidator = ajv.compile(this.paramsJSONSchema!);
+		if (this.bodyJSONSchema) this._bodyValidator = ajv.compile(this.bodyJSONSchema!);
+		if (this.queryJSONSchema) this._queryValidator = ajv.compile(this.queryJSONSchema!);
 	}
 
 	public handler = async (event: APIGatewayEvent) => {
@@ -91,17 +91,17 @@ export class HttpLambdaHandler<
 					event.requestContext.authorizer!.principalId ||
 					event.requestContext.authorizer!.claims[this._cognitoClaim || 'sub'];
 
-			if (this.paramSchema && this._paramValidator) {
+			if (this.paramsJSONSchema && this._paramValidator) {
 				this._paramValidator(event.pathParameters) && Object.assign(e, { params: event.pathParameters });
 			}
 
-			if (event.body && this.bodySchema && this._bodyValidator) {
+			if (event.body && this.bodyJSONSchema && this._bodyValidator) {
 				const body = JSON.parse(event.body);
 
 				this._bodyValidator(body) && Object.assign(e, { body });
 			}
 
-			if (this.querySchema && this._queryValidator) {
+			if (this.queryJSONSchema && this._queryValidator) {
 				this._queryValidator(event.queryStringParameters) && Object.assign(e, { query: event.queryStringParameters });
 			}
 

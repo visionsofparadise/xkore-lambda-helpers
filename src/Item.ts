@@ -9,7 +9,7 @@ import { logger } from './logger';
 import { Response, BAD_REQUEST_400 } from './Response';
 import { ajv } from './ajv';
 
-export type ResourceGeneric = Resource<IResource>;
+export type ItemGeneric = Item<IItem>;
 export type RequiredKeys<Data extends object, Keys extends keyof Data> = Pick<Data, Keys> & Partial<Omit<Data, Keys>>;
 export type OptionalKeys<Data extends object, Keys extends keyof Data> = Omit<Data, Keys> & Partial<Pick<Data, Keys>>;
 
@@ -27,32 +27,32 @@ export const primaryKeySchema = jsonObjectSchemaGenerator<IPrimaryKey>({
 	}
 });
 
-export interface IResource extends IPrimaryKey {
+export interface IItem extends IPrimaryKey {
 	resourceType: string;
-	isSystemResource?: boolean;
+	isSystemItem?: boolean;
 	createdAt: number;
 	updatedAt: number;
 }
 
-export const resourceSchema: JSONSchemaType<IResource> = jsonObjectSchemaGenerator<IResource>({
-	$id: 'Resource',
-	description: 'Resource',
+export const resourceSchema: JSONSchemaType<IItem> = jsonObjectSchemaGenerator<IItem>({
+	$id: 'Item',
+	description: 'Item',
 	properties: {
 		...primaryKeySchema.properties!,
 		resourceType: { type: 'string' },
-		isSystemResource: { type: 'boolean', nullable: true },
+		isSystemItem: { type: 'boolean', nullable: true },
 		createdAt: { type: 'number' },
 		updatedAt: { type: 'number' }
 	}
 });
 
-export class Resource<Schema extends IResource> {
+export class Item<Schema extends IItem> {
 	public static readonly primaryKeySchema = primaryKeySchema;
 	public static readonly resourceSchema = resourceSchema;
 	public static tags: Array<string> = [];
-	public static readonly schema: object;
+	public static readonly jsonSchema: object;
 
-	protected _schema: JSONSchemaType<Schema>;
+	protected _jsonSchema: JSONSchemaType<Schema>;
 	protected _validatorFn: (data: Schema) => boolean;
 	protected _hiddenKeys: Array<keyof Schema>;
 	protected _ownerKeys: Array<keyof Schema>;
@@ -64,7 +64,7 @@ export class Resource<Schema extends IResource> {
 	constructor(
 		props: OptionalKeys<Schema, 'createdAt' | 'updatedAt'>,
 		config: {
-			schema: JSONSchemaType<Schema>;
+			jsonSchema: JSONSchemaType<Schema>;
 			tags?: Array<string>;
 			hiddenKeys: Array<keyof Schema>;
 			ownerKeys: Array<keyof Schema>;
@@ -72,8 +72,8 @@ export class Resource<Schema extends IResource> {
 			tableName: string;
 		}
 	) {
-		this._schema = config.schema;
-		this._validatorFn = ajv.compile(this._schema);
+		this._jsonSchema = config.jsonSchema;
+		this._validatorFn = ajv.compile(this._jsonSchema);
 		this._hiddenKeys = config.hiddenKeys;
 		this._ownerKeys = config.ownerKeys;
 		this._db = dbClient(config.documentClient, config.tableName);
@@ -82,7 +82,7 @@ export class Resource<Schema extends IResource> {
 			...props,
 			createdAt: props.createdAt || day().unix(),
 			updatedAt: props.updatedAt || day().unix(),
-			resourceType: props.resourceType || Resource.resourceSchema.$id
+			resourceType: props.resourceType || Item.resourceSchema.$id
 		} as Schema;
 
 		this._initial = attributes;

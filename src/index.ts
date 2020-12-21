@@ -2,7 +2,7 @@ export { masterLambda } from './cdk/masterLambda';
 export { masterOutput, createOutput } from './cdk/createOutput';
 export { CognitoAuthorizer } from './cdk/CognitoAuthorizer';
 export { Event, EventGeneric } from './Event';
-export { IResource, IPrimaryKey, Resource, ResourceGeneric, RequiredKeys, OptionalKeys } from './Resource';
+export { IItem, IPrimaryKey, Item, ItemGeneric, RequiredKeys, OptionalKeys } from './Item';
 export { dbClient } from './dbClient';
 export { HttpLambdaHandler } from './HttpLambdaHandler';
 export {

@@ -1,19 +1,19 @@
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId, AwsSdkCall } from '@aws-cdk/custom-resources';
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 import { CfnJson, Construct } from '@aws-cdk/core';
-import { IResource } from '../Resource';
+import { IItem } from '../Item';
 
-export interface CustomDynamoDBItemsProps {
+export interface SystemItemsProps {
 	physicalResourceId: string;
 	tableName: string;
 	tableArn: string;
-	items: Array<IResource>;
+	items: Array<IItem>;
 }
 
-export class CustomDynamoDBItems extends Construct {
+export class SystemItems extends Construct {
 	public readonly returnData: AwsCustomResource;
 
-	constructor(scope: Construct, id: string, props: CustomDynamoDBItemsProps) {
+	constructor(scope: Construct, id: string, props: SystemItemsProps) {
 		super(scope, id);
 
 		const requestItems = (requestType: string, id: string) =>

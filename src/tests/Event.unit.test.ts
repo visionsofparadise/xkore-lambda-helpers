@@ -1,15 +1,15 @@
 import { EventBridge } from 'aws-sdk';
 import { nanoid } from 'nanoid';
 import { Event } from '../Event';
-import { TestResource } from './TestResource';
+import { TestItem } from './TestItem';
 
-const testResource = new TestResource({ testAttribute: nanoid() });
+const testItem = new TestItem({ testAttribute: nanoid() });
 
 it('throws internal server error', async () => {
 	const event = new Event({
 		source: 'test',
 		detailType: 'test',
-		detailSchema: TestResource.schema,
+		detailJSONSchema: TestItem.jsonSchema,
 		eventbridge: ({
 			putEvents: jest.fn().mockReturnValue({
 				promise: jest.fn().mockRejectedValue('error')
@@ -17,7 +17,7 @@ it('throws internal server error', async () => {
 		} as unknown) as EventBridge
 	});
 
-	await event.send(testResource.data).catch(error => expect(error).toBeDefined());
+	await event.send(testItem.data).catch(error => expect(error).toBeDefined());
 
 	return;
 });
@@ -26,7 +26,7 @@ it('sends event', async () => {
 	const event = new Event({
 		source: 'test',
 		detailType: 'test',
-		detailSchema: TestResource.schema,
+		detailJSONSchema: TestItem.jsonSchema,
 		eventbridge: ({
 			putEvents: jest.fn().mockReturnValue({
 				promise: jest.fn().mockResolvedValue('success')
@@ -34,7 +34,7 @@ it('sends event', async () => {
 		} as unknown) as EventBridge
 	});
 
-	await event.send(testResource.data);
+	await event.send(testItem.data);
 
 	expect(true).toBeTruthy();
 
@@ -45,7 +45,7 @@ it('sends events', async () => {
 	const event = new Event({
 		source: 'test',
 		detailType: 'test',
-		detailSchema: TestResource.schema,
+		detailJSONSchema: TestItem.jsonSchema,
 		eventbridge: ({
 			putEvents: jest.fn().mockReturnValue({
 				promise: jest.fn().mockResolvedValue('success')
@@ -53,7 +53,7 @@ it('sends events', async () => {
 		} as unknown) as EventBridge
 	});
 
-	await event.send([testResource.data, testResource.data, testResource.data]);
+	await event.send([testItem.data, testItem.data, testItem.data]);
 
 	expect(true).toBeTruthy();
 
