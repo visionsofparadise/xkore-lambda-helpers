@@ -103,9 +103,9 @@ it('validates and infers type correctly', async () => {
 			return e;
 		},
 		{
-			paramSchema: testJSONSchema,
-			bodySchema: testJSONSchema,
-			querySchema: testJSONSchema
+			paramJSONSchema: testJSONSchema,
+			bodyJSONSchema: testJSONSchema,
+			queryJSONSchema: testJSONSchema
 		}
 	);
 

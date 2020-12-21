@@ -37,7 +37,7 @@ export class EventLambda extends Function implements Documented {
 			id: this.node.id,
 			type: 'event',
 			jsonSchemas: this.EventLambdaHandler.detailJSONSchema
-				? [{ schemaName: 'event-detail', schemaJSON: JSON.stringify(this.EventLambdaHandler.detailJSONSchema) }]
+				? [{ schemaName: 'eventDetail', schemaJSON: JSON.stringify(this.EventLambdaHandler.detailJSONSchema) }]
 				: []
 		})
 	];
