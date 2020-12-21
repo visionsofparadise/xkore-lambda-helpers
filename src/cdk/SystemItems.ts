@@ -2,10 +2,10 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId, AwsSdkC
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 import { Construct } from '@aws-cdk/core';
 import { IItem } from '../Item';
-import { Table } from '@aws-cdk/aws-dynamodb';
+import { ITable } from '@aws-cdk/aws-dynamodb';
 
 export interface SystemItemsProps {
-	db: Table;
+	db: ITable;
 	items: Array<IItem>;
 }
 

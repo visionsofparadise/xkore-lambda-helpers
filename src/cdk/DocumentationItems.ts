@@ -1,14 +1,14 @@
 import { Construct } from '@aws-cdk/core';
 import { IDocumentation, Documentation } from '../Documentation';
 import { SystemItems } from './SystemItems';
-import { Table } from '@aws-cdk/aws-dynamodb';
+import { ITable } from '@aws-cdk/aws-dynamodb';
 
 export interface Documented {
 	createDocumentation: (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => Array<Documentation>;
 }
 
 export interface DocumentationItemsProps {
-	db: Table;
+	db: ITable;
 	service: string;
 	stage: string;
 	groups: Array<{
