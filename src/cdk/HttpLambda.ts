@@ -38,32 +38,45 @@ export class HttpLambda extends Function implements Documented {
 		const stack = Stack.of(this);
 		const documentation = [];
 
-		const jsonSchemas = [
-			{
+		const jsonSchemas = [];
+
+		this.HttpLambdaHandler.paramsJSONSchema &&
+			jsonSchemas.push({
 				schemaName: 'params',
 				schemaJSON: stack.toJsonString({
 					value: this.HttpLambdaHandler.paramsJSONSchema
 				})
-			},
-			{
+			});
+
+		this.HttpLambdaHandler.bodyJSONSchema &&
+			jsonSchemas.push({
 				schemaName: 'body',
-				schemaJSON: stack.toJsonString({
-					value: this.HttpLambdaHandler.bodyJSONSchema
-				})
-			},
-			{
+				schemaJSON:
+					this.HttpLambdaHandler.bodyJSONSchema &&
+					stack.toJsonString({
+						value: this.HttpLambdaHandler.bodyJSONSchema
+					})
+			});
+
+		this.HttpLambdaHandler.queryJSONSchema &&
+			jsonSchemas.push({
 				schemaName: 'query',
-				schemaJSON: stack.toJsonString({
-					value: this.HttpLambdaHandler.queryJSONSchema
-				})
-			},
-			{
+				schemaJSON:
+					this.HttpLambdaHandler.queryJSONSchema &&
+					stack.toJsonString({
+						value: this.HttpLambdaHandler.queryJSONSchema
+					})
+			});
+
+		this.HttpLambdaHandler.responseJSONSchema &&
+			jsonSchemas.push({
 				schemaName: 'response',
-				schemaJSON: stack.toJsonString({
-					value: this.HttpLambdaHandler.responseJSONSchema
-				})
-			}
-		];
+				schemaJSON:
+					this.HttpLambdaHandler.responseJSONSchema &&
+					stack.toJsonString({
+						value: this.HttpLambdaHandler.responseJSONSchema
+					})
+			});
 
 		for (const integration of this.integrations) {
 			documentation.push(

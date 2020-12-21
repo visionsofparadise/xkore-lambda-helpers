@@ -2,23 +2,21 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId, AwsSdkC
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 import { Construct } from '@aws-cdk/core';
 import { IItem } from '../Item';
+import { Table } from '@aws-cdk/aws-dynamodb';
 
 export interface SystemItemsProps {
-	tableName: string;
-	tableArn: string;
+	db: Table;
 	items: Array<IItem>;
 }
 
 export class SystemItems extends Construct {
-	public readonly returnData: Array<AwsCustomResource> = [];
-
 	constructor(scope: Construct, id: string, props: SystemItemsProps) {
 		super(scope, id);
 
 		for (let i = 0; i < props.items.length; i++) {
 			const item = props.items[i];
-			const physicalResourceId = PhysicalResourceId.of(id + i);
-			const TableName = props.tableName;
+			const physicalResourceId = PhysicalResourceId.of(item.sk);
+			const TableName = props.db.tableName;
 
 			const onCreate: AwsSdkCall = {
 				physicalResourceId,
@@ -51,21 +49,19 @@ export class SystemItems extends Construct {
 				}
 			};
 
-			this.returnData.push(
-				new AwsCustomResource(this, id + 'CustomResource' + i, {
-					resourceType: 'Custom::' + id,
-					policy: AwsCustomResourcePolicy.fromStatements([
-						new PolicyStatement({
-							effect: Effect.ALLOW,
-							resources: [props.tableArn],
-							actions: ['dynamodb:PutItem', 'dynamodb:DeleteItem']
-						})
-					]),
-					onCreate,
-					onUpdate,
-					onDelete
-				})
-			);
+			new AwsCustomResource(this, id + 'CustomResource' + i, {
+				resourceType: 'Custom::' + id,
+				policy: AwsCustomResourcePolicy.fromStatements([
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						resources: [props.db.tableArn],
+						actions: ['dynamodb:PutItem', 'dynamodb:DeleteItem']
+					})
+				]),
+				onCreate,
+				onUpdate,
+				onDelete
+			});
 		}
 	}
 }

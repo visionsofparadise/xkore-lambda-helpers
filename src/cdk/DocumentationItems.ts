@@ -1,12 +1,14 @@
 import { Construct } from '@aws-cdk/core';
 import { IDocumentation, Documentation } from '../Documentation';
-import { SystemItems, SystemItemsProps } from './SystemItems';
+import { SystemItems } from './SystemItems';
+import { Table } from '@aws-cdk/aws-dynamodb';
 
 export interface Documented {
 	createDocumentation: (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => Array<Documentation>;
 }
 
-export interface DocumentationItemsProps extends Omit<SystemItemsProps, 'physicalResourceId' | 'items'> {
+export interface DocumentationItemsProps {
+	db: Table;
 	service: string;
 	stage: string;
 	groups: Array<{
@@ -17,7 +19,6 @@ export interface DocumentationItemsProps extends Omit<SystemItemsProps, 'physica
 
 export class DocumentationItems extends Construct {
 	public documentationItems: Array<Documentation>;
-	public json: Array<string> = [];
 
 	constructor(scope: Construct, id: string, props: DocumentationItemsProps) {
 		super(scope, id);
@@ -40,8 +41,7 @@ export class DocumentationItems extends Construct {
 		const documentationItemsData = documentationItems.map(documentation => documentation.data);
 
 		new SystemItems(this, 'DocumentationItems', {
-			tableArn: props.tableArn,
-			tableName: props.tableName,
+			db: props.db,
 			items: documentationItemsData
 		});
 	}
