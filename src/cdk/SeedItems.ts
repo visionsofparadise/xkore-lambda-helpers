@@ -3,6 +3,7 @@ import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 import { Construct } from '@aws-cdk/core';
 import { IItem } from '../Item';
 import { ITable } from '@aws-cdk/aws-dynamodb';
+import { Converter } from 'aws-sdk/clients/dynamodb';
 
 export interface SeedItemsProps {
 	db: ITable;
@@ -24,7 +25,7 @@ export class SeedItems extends Construct {
 				action: 'putItem',
 				parameters: {
 					TableName,
-					Item: item
+					Item: Converter.marshall(item)
 				}
 			};
 
@@ -34,7 +35,7 @@ export class SeedItems extends Construct {
 				action: 'putItem',
 				parameters: {
 					TableName,
-					Item: item
+					Item: Converter.marshall(item)
 				}
 			};
 
@@ -45,7 +46,7 @@ export class SeedItems extends Construct {
 				action: 'deleteItem',
 				parameters: {
 					TableName,
-					Key: { pk, sk }
+					Key: Converter.marshall({ pk, sk })
 				}
 			};
 
