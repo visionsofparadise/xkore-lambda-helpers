@@ -1,14 +1,13 @@
 import { Construct } from '@aws-cdk/core';
 import { IDocumentation, Documentation } from '../Documentation';
 import { SeedItems } from './SeedItems';
-import { ITable } from '@aws-cdk/aws-dynamodb';
 
 export interface Documented {
 	createDocumentation: (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => Array<Documentation>;
 }
 
 export interface DocumentationItemsProps {
-	db: ITable;
+	tableArn: string;
 	service: string;
 	stage: string;
 	groups: Array<{
@@ -41,7 +40,7 @@ export class DocumentationItems extends Construct {
 		const documentationItemsData = documentationItems.map(documentation => documentation.data);
 
 		new SeedItems(this, 'DocumentationItems', {
-			db: props.db,
+			tableArn: props.tableArn,
 			items: documentationItemsData
 		});
 	}

@@ -2,11 +2,11 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId, AwsSdkC
 import { Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 import { Construct } from '@aws-cdk/core';
 import { IItem } from '../Item';
-import { ITable } from '@aws-cdk/aws-dynamodb';
+import { Table } from '@aws-cdk/aws-dynamodb';
 import { Converter } from 'aws-sdk/clients/dynamodb';
 
 export interface SeedItemsProps {
-	db: ITable;
+	tableArn: string;
 	items: Array<IItem>;
 }
 
@@ -14,10 +14,12 @@ export class SeedItems extends Construct {
 	constructor(scope: Construct, id: string, props: SeedItemsProps) {
 		super(scope, id);
 
+		const db = Table.fromTableArn(this, id + 'Table', props.tableArn);
+
 		for (let i = 0; i < props.items.length; i++) {
 			const item = props.items[i];
 			const physicalResourceId = PhysicalResourceId.of(item.sk);
-			const TableName = props.db.tableName;
+			const TableName = db.tableName;
 
 			const onCreate: AwsSdkCall = {
 				physicalResourceId,
@@ -55,7 +57,7 @@ export class SeedItems extends Construct {
 				policy: AwsCustomResourcePolicy.fromStatements([
 					new PolicyStatement({
 						effect: Effect.ALLOW,
-						resources: [props.db.tableArn],
+						resources: [db.tableArn],
 						actions: ['dynamodb:PutItem', 'dynamodb:DeleteItem']
 					})
 				]),
