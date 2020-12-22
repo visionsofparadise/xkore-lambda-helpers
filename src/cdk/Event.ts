@@ -22,21 +22,22 @@ export class Event<Detail extends object> extends Construct implements Documente
 	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
 		const stack = Stack.of(this);
 
+		const jsonSchemas = [];
+
+		if (this.Event.detailJSONSchema) {
+			jsonSchemas.push(
+				stack.toJsonString({
+					value: this.Event.detailJSONSchema
+				})
+			);
+		}
+
 		return [
 			new Documentation({
 				...props,
 				id: this.node.id,
 				type: 'event',
-				jsonSchemas: this.Event.detailJSONSchema
-					? [
-							{
-								schemaName: 'event-detail',
-								schemaJSON: stack.toJsonString({
-									value: this.Event.detailJSONSchema
-								})
-							}
-					  ]
-					: []
+				jsonSchemas
 			})
 		];
 	};

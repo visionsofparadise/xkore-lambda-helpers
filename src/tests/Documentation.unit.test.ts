@@ -17,7 +17,7 @@ const testDocumentation = () =>
 		type: 'item',
 		service: 'test',
 		stage: 'test',
-		jsonSchemas: [{ schemaName: 'test', schemaJSON: JSON.stringify(testJSONSchema) }]
+		jsonSchemas: [JSON.stringify(testJSONSchema)]
 	});
 
 it('creates and gets new documentation', async () => {

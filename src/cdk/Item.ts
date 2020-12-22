@@ -28,12 +28,9 @@ export class Item extends Construct implements Documented {
 				id: this.node.id,
 				type: 'item',
 				jsonSchemas: [
-					{
-						schemaName: 'item',
-						schemaJSON: stack.toJsonString({
-							value: this.Item.jsonSchema
-						})
-					}
+					stack.toJsonString({
+						value: this.Item.jsonSchema
+					})
 				]
 			})
 		];

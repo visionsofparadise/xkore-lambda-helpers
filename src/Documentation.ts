@@ -10,25 +10,21 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 	region: 'local-env'
 });
 
-export interface JSONSchema {
-	schemaName: string;
-	schemaJSON: string;
-}
-
 export interface IDocumentation extends IItem {
 	service: string;
 	stage: string;
 	type: 'endpoint' | 'item' | 'event' | 'rule';
 	group?: string;
+	authorizationType?: string;
 	path?: string;
 	method?: string;
 	id: string;
 	tags: Array<string>;
-	jsonSchemas: Array<JSONSchema>;
+	jsonSchemas: Array<string>;
 }
 
 const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
-	$id: 'Documentation',
+	title: 'Documentation',
 	description: 'Documentation containing deployment info and JSON schemas for resources, events and more.',
 	properties: {
 		...Item.resourceSchema.properties!,
@@ -36,19 +32,13 @@ const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
 		stage: { type: 'string' },
 		type: { type: 'string', nullable: true },
 		group: { type: 'string', nullable: true },
+		authorizationType: { type: 'string', nullable: true },
 		path: { type: 'string', nullable: true },
 		method: { type: 'string', nullable: true },
 		id: { type: 'string' },
 		jsonSchemas: {
 			type: 'array',
-			items: jsonObjectSchemaGenerator({
-				$id: 'JSONSchema',
-				description: 'The schema name and JSON',
-				properties: {
-					schemaName: { type: 'string' },
-					schemaJSON: { type: 'string' }
-				}
-			})
+			items: { type: 'string' }
 		},
 		tags: { type: 'array', items: { type: 'string' } }
 	}
@@ -65,11 +55,11 @@ export class Documentation extends Item<IDocumentation> {
 		super(
 			{
 				...params,
-				pk: params.pk || Documentation.jsonSchema.$id!,
+				pk: params.pk || Documentation.jsonSchema.title!,
 				sk: params.sk || `${params.stage}-${id}`,
 				id,
 				isSystemItem: true,
-				resourceType: params.resourceType || Documentation.jsonSchema.$id!,
+				resourceType: params.resourceType || Documentation.jsonSchema.title!,
 				tags: params.tags || []
 			},
 			Documentation
@@ -77,7 +67,7 @@ export class Documentation extends Item<IDocumentation> {
 	}
 
 	static pk = ({ id, stage }: Pick<IDocumentation, 'id' | 'stage'>) => ({
-		pk: Documentation.jsonSchema.$id!,
+		pk: Documentation.jsonSchema.title!,
 		sk: `${stage}-${id}`
 	});
 
@@ -91,7 +81,7 @@ export class Documentation extends Item<IDocumentation> {
 			.query<IDocumentation>({
 				KeyConditionExpression: `pk = :pk AND begins_with (sk, :stage)`,
 				ExpressionAttributeValues: {
-					':pk': Documentation.jsonSchema.$id!,
+					':pk': Documentation.jsonSchema.title!,
 					':stage': params.stage
 				}
 			})

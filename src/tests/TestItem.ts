@@ -15,7 +15,7 @@ export interface ITestItem extends IItem {
 }
 
 const jsonSchema: JSONSchemaType<ITestItem> = jsonObjectSchemaGenerator({
-	$id: 'TestItem',
+	title: 'TestItem',
 	description: 'Test resource',
 	properties: {
 		...Item.resourceSchema.properties!,
@@ -35,8 +35,8 @@ export class TestItem extends Item<ITestItem> {
 			{
 				...params,
 				pk: params.pk || nanoid(),
-				sk: params.sk || TestItem.jsonSchema.$id!,
-				resourceType: params.resourceType || TestItem.jsonSchema.$id!
+				sk: params.sk || TestItem.jsonSchema.title!,
+				resourceType: params.resourceType || TestItem.jsonSchema.title!
 			},
 			TestItem
 		);

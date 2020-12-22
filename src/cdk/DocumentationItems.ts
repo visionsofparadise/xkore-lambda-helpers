@@ -1,6 +1,6 @@
 import { Construct } from '@aws-cdk/core';
 import { IDocumentation, Documentation } from '../Documentation';
-import { SystemItems } from './SystemItems';
+import { SeedItems } from './SeedItems';
 import { ITable } from '@aws-cdk/aws-dynamodb';
 
 export interface Documented {
@@ -40,7 +40,7 @@ export class DocumentationItems extends Construct {
 		this.documentationItems = documentationItems;
 		const documentationItemsData = documentationItems.map(documentation => documentation.data);
 
-		new SystemItems(this, 'DocumentationItems', {
+		new SeedItems(this, 'DocumentationItems', {
 			db: props.db,
 			items: documentationItemsData
 		});

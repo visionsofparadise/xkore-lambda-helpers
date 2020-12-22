@@ -34,21 +34,22 @@ export class EventLambda extends Function implements Documented {
 	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
 		const stack = Stack.of(this);
 
+		const jsonSchemas = [];
+
+		if (this.EventLambdaHandler.detailJSONSchema) {
+			jsonSchemas.push(
+				stack.toJsonString({
+					value: this.EventLambdaHandler.detailJSONSchema
+				})
+			);
+		}
+
 		return [
 			new Documentation({
 				...props,
 				id: this.node.id,
 				type: 'event',
-				jsonSchemas: this.EventLambdaHandler.detailJSONSchema
-					? [
-							{
-								schemaName: 'eventDetail',
-								schemaJSON: stack.toJsonString({
-									value: this.EventLambdaHandler.detailJSONSchema
-								})
-							}
-					  ]
-					: []
+				jsonSchemas
 			})
 		];
 	};

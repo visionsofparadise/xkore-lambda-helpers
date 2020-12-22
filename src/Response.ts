@@ -28,4 +28,4 @@ export const SUCCESS_200 = (body: any) => ({ statusCode: 200, body });
 export const SUCCESS_NO_CONTENT_204 = { statusCode: 204 };
 export const BAD_REQUEST_400 = (error: any) => ({ statusCode: 400, body: error });
 export const UNAUTHORIZED_401 = { statusCode: 401, body: 'Unauthorized' };
-export const NOT_FOUND_404 = { statusCode: 404, body: 'Resource not found' };
+export const NOT_FOUND_404 = { statusCode: 404, body: 'Item not found' };

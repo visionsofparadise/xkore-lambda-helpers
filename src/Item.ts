@@ -19,7 +19,7 @@ export interface IPrimaryKey {
 }
 
 export const primaryKeySchema = jsonObjectSchemaGenerator<IPrimaryKey>({
-	$id: 'PrimaryKey',
+	title: 'PrimaryKey',
 	description: 'Partition key and sort key.',
 	properties: {
 		pk: { type: 'string' },
@@ -35,7 +35,7 @@ export interface IItem extends IPrimaryKey {
 }
 
 export const resourceSchema: JSONSchemaType<IItem> = jsonObjectSchemaGenerator<IItem>({
-	$id: 'Item',
+	title: 'Item',
 	description: 'Item',
 	properties: {
 		...primaryKeySchema.properties!,
@@ -82,7 +82,7 @@ export class Item<Schema extends IItem> {
 			...props,
 			createdAt: props.createdAt || day().unix(),
 			updatedAt: props.updatedAt || day().unix(),
-			resourceType: props.resourceType || Item.resourceSchema.$id
+			resourceType: props.resourceType || Item.resourceSchema.title
 		} as Schema;
 
 		this._initial = attributes;

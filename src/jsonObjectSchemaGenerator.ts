@@ -2,12 +2,10 @@ import { JSONSchemaType } from 'ajv';
 import { RequiredKeys } from './Item';
 
 export const jsonObjectSchemaGenerator = <Data extends object>(
-	schema: RequiredKeys<JSONSchemaType<Data>, '$id' | 'description' | 'properties'>
+	schema: RequiredKeys<JSONSchemaType<Data>, 'title' | 'properties'>
 ): JSONSchemaType<Data> => {
 	const jsonSchema = ({
-		$schema: schema.$schema || 'http://json-schema.org/draft-07/schema#',
-		$id: schema.$id,
-		title: schema.title || schema.$id,
+		title: schema.title,
 		description: schema.description,
 		type: schema.type || 'object',
 		properties: schema.properties,

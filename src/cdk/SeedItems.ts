@@ -4,13 +4,13 @@ import { Construct } from '@aws-cdk/core';
 import { IItem } from '../Item';
 import { ITable } from '@aws-cdk/aws-dynamodb';
 
-export interface SystemItemsProps {
+export interface SeedItemsProps {
 	db: ITable;
 	items: Array<IItem>;
 }
 
-export class SystemItems extends Construct {
-	constructor(scope: Construct, id: string, props: SystemItemsProps) {
+export class SeedItems extends Construct {
+	constructor(scope: Construct, id: string, props: SeedItemsProps) {
 		super(scope, id);
 
 		for (let i = 0; i < props.items.length; i++) {
