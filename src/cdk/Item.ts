@@ -25,7 +25,7 @@ export class Item extends Construct implements Documented {
 		return [
 			new Documentation({
 				...props,
-				id: this.node.id,
+				id: (this.Item.jsonSchema as { title: string }).title,
 				type: 'item',
 				jsonSchemas: [
 					stack.toJsonString({

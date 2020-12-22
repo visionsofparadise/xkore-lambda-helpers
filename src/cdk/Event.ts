@@ -11,8 +11,8 @@ export interface EventProps<Detail extends object> {
 export class Event<Detail extends object> extends Construct implements Documented {
 	public Event: EventClass<Detail>;
 
-	constructor(scope: Construct, id: string, props: EventProps<Detail>) {
-		super(scope, id);
+	constructor(scope: Construct, props: EventProps<Detail>) {
+		super(scope, props.Event.detailType);
 
 		this.Event = props.Event;
 

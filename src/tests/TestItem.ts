@@ -1,7 +1,6 @@
 import { IItem, RequiredKeys, Item } from '../Item';
 import AWS from 'aws-sdk';
 import { nanoid } from 'nanoid';
-import { JSONSchemaType } from 'ajv';
 import { jsonObjectSchemaGenerator } from '../jsonObjectSchemaGenerator';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
@@ -14,7 +13,7 @@ export interface ITestItem extends IItem {
 	testAttribute: string;
 }
 
-const jsonSchema: JSONSchemaType<ITestItem> = jsonObjectSchemaGenerator({
+const jsonSchema = jsonObjectSchemaGenerator<ITestItem>({
 	title: 'TestItem',
 	description: 'Test resource',
 	properties: {

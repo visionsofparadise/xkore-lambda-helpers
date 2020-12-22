@@ -34,7 +34,7 @@ export interface IItem extends IPrimaryKey {
 	updatedAt: number;
 }
 
-export const resourceSchema: JSONSchemaType<IItem> = jsonObjectSchemaGenerator<IItem>({
+export const resourceSchema = jsonObjectSchemaGenerator<IItem>({
 	title: 'Item',
 	description: 'Item',
 	properties: {
