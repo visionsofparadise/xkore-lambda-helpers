@@ -5,6 +5,8 @@ import uDelay from 'udelay';
 export interface ITestUser {
 	userId: string;
 	accessToken: string;
+	idToken: string;
+	refreshToken: string;
 }
 
 export const testUser = async (
@@ -50,7 +52,9 @@ export const testUser = async (
 
 	const user: ITestUser = {
 		userId: signUpResponse.UserSub,
-		accessToken: signInResponse.AuthenticationResult!.AccessToken!
+		accessToken: signInResponse.AuthenticationResult!.AccessToken!,
+		idToken: signInResponse.AuthenticationResult!.IdToken!,
+		refreshToken: signInResponse.AuthenticationResult!.RefreshToken!
 	};
 
 	const deleteUser = async () =>
