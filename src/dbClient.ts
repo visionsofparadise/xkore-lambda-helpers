@@ -10,7 +10,7 @@ export interface ItemList<Item extends IPrimaryKey> {
 	LastEvaluatedKey?: IPrimaryKey;
 }
 
-export const dbClient = (docDB: DocumentClient, tableName: string) => {
+export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 	const queryDefaults = {
 		TableName: tableName
 	};
@@ -19,7 +19,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		get: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.GetItemInput>) => {
 			logger.info({ query });
 
-			const data = ((await docDB
+			const data = ((await documentClient
 				.get({ ...queryDefaults, ...query })
 				.promise()
 				.then(result => result.Item)) as unknown) as Promise<Data>;
@@ -32,7 +32,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		put: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.PutItemInput>, isNew?: boolean) => {
 			logger.info({ query });
 
-			const data = ((await docDB
+			const data = ((await documentClient
 				.put({
 					...queryDefaults,
 					...query,
@@ -62,7 +62,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		update: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.UpdateItemInput>) => {
 			logger.info({ query });
 
-			const data = ((await docDB
+			const data = ((await documentClient
 				.update({
 					...queryDefaults,
 					...query
@@ -78,7 +78,7 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		query: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.QueryInput>) => {
 			logger.info({ query });
 
-			const data = (await docDB.query({ ...queryDefaults, ...query }).promise()) as ItemList<Data>;
+			const data = (await documentClient.query({ ...queryDefaults, ...query }).promise()) as ItemList<Data>;
 
 			logger.info({ data });
 
@@ -88,13 +88,13 @@ export const dbClient = (docDB: DocumentClient, tableName: string) => {
 		scan: async <Data extends IPrimaryKey>(query?: WithDefaults<DocumentClient.ScanInput>) => {
 			logger.info({ query });
 
-			return (docDB.scan({ ...queryDefaults, ...query }).promise() as unknown) as ItemList<Data>;
+			return (documentClient.scan({ ...queryDefaults, ...query }).promise() as unknown) as ItemList<Data>;
 		},
 
 		delete: async (query: WithDefaults<DocumentClient.DeleteItemInput>) => {
 			logger.info({ query });
 
-			return docDB
+			return documentClient
 				.delete({
 					...queryDefaults,
 					...query,

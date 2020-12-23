@@ -70,6 +70,10 @@ export const testUser = async (
 
 		await deleteUser();
 	} catch (error) {
+		logger.info(error);
+
 		await deleteUser();
+
+		throw error;
 	}
 };
