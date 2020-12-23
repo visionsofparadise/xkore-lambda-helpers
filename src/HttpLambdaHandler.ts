@@ -4,13 +4,7 @@ import { APIGatewayEvent } from 'aws-lambda/trigger/api-gateway-proxy';
 import { JSONSchemaType, ValidateFunction } from 'ajv';
 import { ajv } from './ajv';
 
-export type HttpLambdaHandlerGeneric = HttpLambdaHandler<
-	object | undefined,
-	object | undefined,
-	object | undefined,
-	object | undefined,
-	boolean | undefined
->;
+export type HttpLambdaHandlerGeneric = HttpLambdaHandler<any, any, any, any, any>;
 
 interface HttpLambdaEvent<
 	P extends object | undefined,
@@ -78,7 +72,7 @@ export class HttpLambdaHandler<
 		logger.info({ event });
 
 		try {
-			let e = {
+			let fnEvent = {
 				event,
 				userId: undefined,
 				params: undefined,
@@ -87,27 +81,28 @@ export class HttpLambdaHandler<
 			};
 
 			if (this._authorizer)
-				e.userId =
+				fnEvent.userId =
 					event.requestContext.authorizer!.principalId ||
 					event.requestContext.authorizer!.claims[this._cognitoClaim || 'sub'];
 
 			if (this.paramsJSONSchema && this._paramValidator) {
-				this._paramValidator(event.pathParameters) && Object.assign(e, { params: event.pathParameters });
+				this._paramValidator(event.pathParameters) && Object.assign(fnEvent, { params: event.pathParameters });
 			}
 
 			if (event.body && this.bodyJSONSchema && this._bodyValidator) {
 				const body = JSON.parse(event.body);
 
-				this._bodyValidator(body) && Object.assign(e, { body });
+				this._bodyValidator(body) && Object.assign(fnEvent, { body });
 			}
 
 			if (this.queryJSONSchema && this._queryValidator) {
-				this._queryValidator(event.queryStringParameters) && Object.assign(e, { query: event.queryStringParameters });
+				this._queryValidator(event.queryStringParameters) &&
+					Object.assign(fnEvent, { query: event.queryStringParameters });
 			}
 
-			logger.info({ e });
+			logger.info({ fnEvent });
 
-			const data = await this._handlerFn(e as HttpLambdaEvent<Params, Body, Query, Authorizer>);
+			const data = await this._handlerFn(fnEvent as HttpLambdaEvent<Params, Body, Query, Authorizer>);
 
 			logger.info(data);
 
