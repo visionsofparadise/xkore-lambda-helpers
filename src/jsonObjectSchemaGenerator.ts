@@ -1,6 +1,8 @@
 import { JSONSchemaType } from 'ajv';
 import { RequiredKeys } from './Item';
 
+export type JSONObjectSchemaType<Data extends object> = JSONSchemaType<Data>;
+
 export const jsonObjectSchemaGenerator = <Data extends object>(
 	schema: RequiredKeys<JSONSchemaType<Data>, 'properties'>
 ): JSONSchemaType<Data> => {
