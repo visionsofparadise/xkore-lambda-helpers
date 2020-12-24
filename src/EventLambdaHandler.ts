@@ -10,13 +10,13 @@ export class EventLambdaHandler<
 	protected _handlerFn: (e: EventBridgeEvent<DetailType, Detail>) => void | Promise<void>;
 
 	public detailType: Array<DetailType>;
-	public detailJSONSchema?: DetailJSONSchema;
+	public detailJSONSchema: DetailJSONSchema;
 	public tags: Array<string>;
 
 	constructor(
 		config: {
 			detailType: Array<DetailType>;
-			detailJSONSchema?: DetailJSONSchema;
+			detailJSONSchema: DetailJSONSchema;
 			tags?: Array<string>;
 		},
 		handler: (e: EventBridgeEvent<DetailType, Detail>) => void | Promise<void>
