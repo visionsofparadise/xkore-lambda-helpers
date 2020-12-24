@@ -22,7 +22,7 @@ export const masterLambda = (masterConfig: Pick<FunctionProps, 'code' | 'runtime
 		initializeEventLambda: (source: string) => (
 			scope: Construct,
 			id: string,
-			config: Omit<EventLambdaProps, 'code' | 'runtime' | 'source'>
+			config: Omit<EventLambdaProps, 'handler' | 'code' | 'runtime' | 'source'>
 		) =>
 			new EventLambda(scope, id, {
 				...masterConfig,
