@@ -35,7 +35,7 @@ export const testUser = async (
 
 	logger.info(signUpResponse);
 
-	await uDelay(3000);
+	await uDelay(2000);
 
 	const signInResponse = await props.cognito
 		.initiateAuth({

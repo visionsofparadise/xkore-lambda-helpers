@@ -9,7 +9,6 @@ import { logger } from './logger';
 import { Response, BAD_REQUEST_400 } from './Response';
 import { ajv } from './ajv';
 
-export type ItemGeneric = Item<IItem>;
 export type RequiredKeys<Data extends object, Keys extends keyof Data> = Pick<Data, Keys> & Partial<Omit<Data, Keys>>;
 export type OptionalKeys<Data extends object, Keys extends keyof Data> = Omit<Data, Keys> & Partial<Pick<Data, Keys>>;
 
@@ -28,18 +27,18 @@ export const primaryKeySchema = jsonObjectSchemaGenerator<IPrimaryKey>({
 });
 
 export interface IItem extends IPrimaryKey {
-	resourceType: string;
+	itemType: string;
 	isSystemItem?: boolean;
 	createdAt: number;
 	updatedAt: number;
 }
 
-export const resourceSchema = jsonObjectSchemaGenerator<IItem>({
+export const itemSchema = jsonObjectSchemaGenerator<IItem>({
 	title: 'Item',
 	description: 'Item',
 	properties: {
 		...primaryKeySchema.properties!,
-		resourceType: { type: 'string' },
+		itemType: { type: 'string' },
 		isSystemItem: { type: 'boolean', nullable: true },
 		createdAt: { type: 'number' },
 		updatedAt: { type: 'number' }
@@ -48,7 +47,7 @@ export const resourceSchema = jsonObjectSchemaGenerator<IItem>({
 
 export class Item<Schema extends IItem> {
 	public static readonly primaryKeySchema = primaryKeySchema;
-	public static readonly resourceSchema = resourceSchema;
+	public static readonly itemSchema = itemSchema;
 	public static tags: Array<string> = [];
 	public static readonly jsonSchema: object;
 
@@ -82,7 +81,7 @@ export class Item<Schema extends IItem> {
 			...props,
 			createdAt: props.createdAt || day().unix(),
 			updatedAt: props.updatedAt || day().unix(),
-			resourceType: props.resourceType || Item.resourceSchema.title
+			itemType: props.itemType || Item.itemSchema.title
 		} as Schema;
 
 		this._initial = attributes;

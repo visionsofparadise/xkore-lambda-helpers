@@ -4,14 +4,6 @@ import { APIGatewayEvent } from 'aws-lambda/trigger/api-gateway-proxy';
 import { JSONSchemaType, ValidateFunction } from 'ajv';
 import { ajv } from './ajv';
 
-export type HttpLambdaHandlerGeneric = HttpLambdaHandler<
-	object | undefined,
-	object | undefined,
-	object | undefined,
-	object | undefined,
-	boolean | undefined
->;
-
 interface HttpLambdaEvent<
 	P extends object | undefined,
 	B extends object | undefined,

@@ -1,8 +1,21 @@
 export { masterLambda } from './cdk/masterLambda';
 export { masterOutput, createOutput } from './cdk/createOutput';
 export { CognitoAuthorizer } from './cdk/CognitoAuthorizer';
-export { Event, EventGeneric } from './Event';
-export { IItem, IPrimaryKey, Item, ItemGeneric, RequiredKeys, OptionalKeys } from './Item';
+export { SeedItems, SeedItemsProps } from './cdk/SeedItems';
+export { EventResource, EventResourceProps } from './cdk/EventResource';
+export { ItemResource, ItemResourceProps } from './cdk/ItemResource';
+export { DocumentationItems, DocumentationItemsProps, Documented } from './cdk/DocumentationItems';
+export { Api, ApiProps } from './cdk/Api';
+export { ApiKeyApi, ApiKeyApiProps } from './cdk/ApiKeyApi';
+export { CognitoApi, CognitoApiProps } from './cdk/CognitoApi';
+export { HttpLambda } from './cdk/HttpLambda';
+export { EventLambda } from './cdk/EventLambda';
+export { Event } from './Event';
+export { EventLambdaHandler } from './EventLambdaHandler';
+export { testUser, ITestUser } from './testUser';
+export { jsonObjectSchemaGenerator, JSONObjectSchemaType } from './jsonObjectSchemaGenerator';
+export { Documentation, IDocumentation } from './Documentation';
+export { IItem, IPrimaryKey, Item, RequiredKeys, OptionalKeys, primaryKeySchema, itemSchema } from './Item';
 export { dbClient } from './dbClient';
 export { HttpLambdaHandler } from './HttpLambdaHandler';
 export {

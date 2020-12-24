@@ -25,9 +25,9 @@ export interface IDocumentation extends IItem {
 
 const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
 	title: 'Documentation',
-	description: 'Documentation containing deployment info and JSON schemas for resources, events and more.',
+	description: 'Documentation containing deployment info and JSON schemas for items, events and more.',
 	properties: {
-		...Item.resourceSchema.properties!,
+		...Item.itemSchema.properties!,
 		service: { type: 'string' },
 		stage: { type: 'string' },
 		type: { type: 'string', nullable: true },
@@ -59,7 +59,7 @@ export class Documentation extends Item<IDocumentation> {
 				sk: params.sk || `${params.stage}-${id}`,
 				id,
 				isSystemItem: true,
-				resourceType: params.resourceType || Documentation.jsonSchema.title!,
+				itemType: params.itemType || Documentation.jsonSchema.title!,
 				tags: params.tags || []
 			},
 			Documentation

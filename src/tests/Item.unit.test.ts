@@ -11,7 +11,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 
 const db = dbClient(documentClient, 'test');
 
-it('validates resource', async () => {
+it('validates item', async () => {
 	const testData = new TestItem({ testAttribute: nanoid() });
 
 	const result = testData.validate();
@@ -19,7 +19,7 @@ it('validates resource', async () => {
 	expect(result).toBe(true);
 });
 
-it('throws on invalid resource', async () => {
+it('throws on invalid item', async () => {
 	expect.assertions(1);
 
 	const testData = new TestItem({ testAttribute: (123 as unknown) as string });
@@ -31,7 +31,7 @@ it('throws on invalid resource', async () => {
 	}
 });
 
-it('creates resource', async () => {
+it('creates item', async () => {
 	const testData = await new TestItem({ testAttribute: nanoid() }).create();
 
 	const getData = await db.get({
@@ -39,10 +39,10 @@ it('creates resource', async () => {
 	});
 
 	expect(getData).toStrictEqual(testData.data);
-	expect(testData.data.resourceType).toBe('TestItem');
+	expect(testData.data.itemType).toBe('TestItem');
 });
 
-it('saves data to resource', async () => {
+it('saves data to item', async () => {
 	const testData = new TestItem({ testAttribute: nanoid() });
 
 	await documentClient
@@ -65,11 +65,11 @@ it('saves data to resource', async () => {
 	expect(getData.testAttribute).toBe('updated');
 });
 
-it('save fails if resource doesnt exist', async () => {
+it('save fails if item doesnt exist', async () => {
 	await new TestItem({ testAttribute: nanoid() }).save().catch(err => expect(err).toBeDefined());
 });
 
-it('deletes resource', async () => {
+it('deletes item', async () => {
 	const testData = new TestItem({ testAttribute: nanoid() });
 
 	await documentClient

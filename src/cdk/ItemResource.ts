@@ -1,17 +1,17 @@
 import { Construct, Stack } from '@aws-cdk/core';
-import { Item as ItemModel } from '../Item';
+import { Item } from '../Item';
 import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
 
-export interface ItemProps {
-	Item: typeof ItemModel;
+export interface ItemResourceProps {
+	Item: typeof Item;
 	tags?: Array<string>;
 }
 
-export class Item extends Construct implements Documented {
-	public Item: typeof ItemModel;
+export class ItemResource extends Construct implements Documented {
+	public Item: typeof Item;
 
-	constructor(scope: Construct, id: string, props: ItemProps) {
+	constructor(scope: Construct, id: string, props: ItemResourceProps) {
 		super(scope, id);
 
 		this.Item = props.Item;

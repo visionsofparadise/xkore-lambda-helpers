@@ -1,17 +1,17 @@
 import { Construct, Stack } from '@aws-cdk/core';
-import { Event as EventClass } from '../Event';
+import { Event } from '../Event';
 import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
 
-export interface EventProps<Detail extends object> {
-	Event: EventClass<Detail>;
+export interface EventResourceProps<Detail extends object> {
+	Event: Event<Detail>;
 	tags?: Array<string>;
 }
 
-export class Event<Detail extends object> extends Construct implements Documented {
-	public Event: EventClass<Detail>;
+export class EventResource<Detail extends object> extends Construct implements Documented {
+	public Event: Event<Detail>;
 
-	constructor(scope: Construct, props: EventProps<Detail>) {
+	constructor(scope: Construct, props: EventResourceProps<Detail>) {
 		super(scope, props.Event.detailType);
 
 		this.Event = props.Event;

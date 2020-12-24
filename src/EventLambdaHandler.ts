@@ -2,8 +2,6 @@ import { logger } from './logger';
 import { JSONSchemaType } from 'ajv';
 import { EventBridgeEvent } from 'aws-lambda';
 
-export type EventLambdaHandlerGeneric = EventLambdaHandler<string, object>;
-
 export class EventLambdaHandler<
 	DetailType extends string,
 	Detail extends object,
