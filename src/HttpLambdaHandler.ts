@@ -49,7 +49,7 @@ export class HttpLambdaHandler<
 			method: 'POST' | 'GET' | 'DELETE' | 'PUT' | 'PATCH';
 			tags?: Array<string>;
 		},
-		handler: (e: HttpLambdaEvent<Params, Body, Query, Authorizer>) => any | Promise<any>
+		handler: (event: HttpLambdaEvent<Params, Body, Query, Authorizer>) => any | Promise<any>
 	) {
 		this._authorizer = config.authorizer;
 		this._cognitoClaim = config.cognitoClaim;

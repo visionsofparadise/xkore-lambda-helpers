@@ -1,18 +1,18 @@
 import { Construct, Stack } from '@aws-cdk/core';
 import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
-import { HttpLambdaHandler } from '../HttpLambdaHandler';
 import { IResource, LambdaIntegration, MethodOptions } from '@aws-cdk/aws-apigateway';
 import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
 
-export interface HttpLambdaProps<
-	Params extends object | undefined,
-	Body extends object | undefined,
-	Query extends object | undefined,
-	Response extends object | undefined,
-	Authorizer extends boolean | undefined
-> extends FunctionProps {
-	HttpLambdaHandler: HttpLambdaHandler<Params, Body, Query, Response, Authorizer>;
+export interface HttpLambdaProps extends FunctionProps {
+	HttpLambdaHandler: {
+		tags?: Array<string>;
+		paramsJSONSchema?: object;
+		bodyJSONSchema?: object;
+		queryJSONSchema?: object;
+		responseJSONSchema?: object;
+		method: string;
+	};
 	integrations: Array<{
 		resource: IResource;
 		options: MethodOptions;
@@ -20,28 +20,20 @@ export interface HttpLambdaProps<
 	tags?: Array<string>;
 }
 
-export class HttpLambda<
-		Params extends object | undefined,
-		Body extends object | undefined,
-		Query extends object | undefined,
-		Response extends object | undefined,
-		Authorizer extends boolean | undefined
-	>
-	extends Function
-	implements Documented {
-	public HttpLambdaHandler: HttpLambdaHandler<Params, Body, Query, Response, Authorizer>;
+export class HttpLambda extends Function implements Documented {
+	public HttpLambdaHandler: HttpLambdaProps['HttpLambdaHandler'];
 	public integrations: Array<{
 		resource: IResource;
 		options: MethodOptions;
 	}>;
 
-	constructor(scope: Construct, id: string, props: HttpLambdaProps<Params, Body, Query, Response, Authorizer>) {
+	constructor(scope: Construct, id: string, props: HttpLambdaProps) {
 		super(scope, id, props);
 
 		this.HttpLambdaHandler = props.HttpLambdaHandler;
 		this.integrations = props.integrations;
 
-		if (props.tags) this.HttpLambdaHandler.tags = [...this.HttpLambdaHandler.tags, ...props.tags];
+		if (props.tags) this.HttpLambdaHandler.tags = [...this.HttpLambdaHandler.tags!, ...props.tags];
 
 		for (const integration of props.integrations) {
 			integration.resource.addMethod(props.HttpLambdaHandler.method, new LambdaIntegration(this), integration.options);

@@ -1,33 +1,25 @@
 import { Construct, Stack } from '@aws-cdk/core';
 import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
-import { EventLambdaHandler } from '../EventLambdaHandler';
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 import { IDocumentation, Documentation } from '../Documentation';
 import { Rule } from '@aws-cdk/aws-events';
 import { Documented } from './DocumentationItems';
-import { JSONSchemaType } from 'ajv';
 
-export interface EventLambdaProps<
-	DetailType extends string,
-	Detail extends object,
-	DetailJSONSchema = JSONSchemaType<Detail>
-> extends FunctionProps {
-	EventLambdaHandler: EventLambdaHandler<DetailType, Detail, DetailJSONSchema>;
+export interface EventLambdaProps extends FunctionProps {
+	EventLambdaHandler: { tags?: Array<string>; detailType: Array<string>; detailJSONSchema: object };
 	source: string;
 	tags?: Array<string>;
 }
 
-export class EventLambda<DetailType extends string, Detail extends object, DetailJSONSchema = JSONSchemaType<Detail>>
-	extends Function
-	implements Documented {
-	public EventLambdaHandler: EventLambdaHandler<DetailType, Detail, DetailJSONSchema>;
+export class EventLambda extends Function implements Documented {
+	public EventLambdaHandler: EventLambdaProps['EventLambdaHandler'];
 
-	constructor(scope: Construct, id: string, props: EventLambdaProps<DetailType, Detail, DetailJSONSchema>) {
+	constructor(scope: Construct, id: string, props: EventLambdaProps) {
 		super(scope, id, props);
 
 		this.EventLambdaHandler = props.EventLambdaHandler;
 
-		if (props.tags) this.EventLambdaHandler.tags = [...this.EventLambdaHandler.tags, ...props.tags];
+		if (props.tags) this.EventLambdaHandler.tags = [...this.EventLambdaHandler.tags!, ...props.tags];
 
 		new Rule(this, `${id}Rule`, {
 			eventPattern: {
