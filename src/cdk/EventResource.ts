@@ -3,20 +3,19 @@ import { Event } from '../Event';
 import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
 
-export interface EventResourceProps<Detail extends object> {
-	Event: Event<Detail>;
+export interface EventResourceProps {
 	tags?: Array<string>;
 }
 
 export class EventResource<Detail extends object> extends Construct implements Documented {
 	public Event: Event<Detail>;
 
-	constructor(scope: Construct, props: EventResourceProps<Detail>) {
-		super(scope, props.Event.detailType);
+	constructor(scope: Construct, Event: Event<Detail>, props?: EventResourceProps) {
+		super(scope, Event.detailType);
 
-		this.Event = props.Event;
+		this.Event = Event;
 
-		if (props.tags) this.Event.tags = [...this.Event.tags, ...props.tags];
+		if (props && props.tags) this.Event.tags = [...this.Event.tags, ...props.tags];
 	}
 
 	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {

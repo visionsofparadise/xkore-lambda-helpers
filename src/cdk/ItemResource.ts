@@ -4,19 +4,18 @@ import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
 
 export interface ItemResourceProps {
-	Item: typeof Item;
 	tags?: Array<string>;
 }
 
-export class ItemResource extends Construct implements Documented {
-	public Item: typeof Item;
+export class ItemResource<ItemClass extends typeof Item> extends Construct implements Documented {
+	public Item: ItemClass;
 
-	constructor(scope: Construct, id: string, props: ItemResourceProps) {
-		super(scope, id);
+	constructor(scope: Construct, Item: ItemClass, props?: ItemResourceProps) {
+		super(scope, (Item.jsonSchema as { title: string }).title!);
 
-		this.Item = props.Item;
+		this.Item = Item;
 
-		if (props.tags) this.Item.tags = [...this.Item.tags, ...props.tags];
+		if (props && props.tags) this.Item.tags = [...this.Item.tags, ...props.tags];
 	}
 
 	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
