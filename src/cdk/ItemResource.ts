@@ -1,5 +1,4 @@
 import { Construct, Stack } from '@aws-cdk/core';
-import { Item } from '../Item';
 import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
 
@@ -7,7 +6,12 @@ export interface ItemResourceProps {
 	tags?: Array<string>;
 }
 
-export class ItemResource<ItemClass extends typeof Item> extends Construct implements Documented {
+interface ItemClass {
+	jsonSchema: any;
+	tags: Array<string>;
+}
+
+export class ItemResource extends Construct implements Documented {
 	public Item: ItemClass;
 
 	constructor(scope: Construct, Item: ItemClass, props?: ItemResourceProps) {
