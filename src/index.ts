@@ -14,6 +14,7 @@ export { Event } from './Event';
 export { EventLambdaHandler } from './EventLambdaHandler';
 export { putEvents, createPutEvents } from './putEvents';
 export { testUser, ITestUser } from './testUser';
+export { testApiKey } from './testApiKey';
 export { jsonObjectSchemaGenerator, JSONObjectSchemaType } from './jsonObjectSchemaGenerator';
 export { Documentation, IDocumentation } from './Documentation';
 export { IItem, IPrimaryKey, Item, RequiredKeys, OptionalKeys, primaryKeySchema, itemSchema } from './Item';
