@@ -6,13 +6,13 @@ import { Rule } from '@aws-cdk/aws-events';
 import { Documented } from './DocumentationItems';
 
 export interface EventLambdaProps extends FunctionProps {
-	EventLambdaHandler: { tags?: Array<string>; detailType: Array<string>; detailJSONSchema: object };
+	EventLambdaHandler: EventLambda['EventLambdaHandler'];
 	source: string;
 	tags?: Array<string>;
 }
 
 export class EventLambda extends Function implements Documented {
-	public EventLambdaHandler: EventLambdaProps['EventLambdaHandler'];
+	public EventLambdaHandler: { tags?: Array<string>; detailType: Array<string>; detailJSONSchema: object };
 
 	constructor(scope: Construct, id: string, props: EventLambdaProps) {
 		super(scope, id, props);

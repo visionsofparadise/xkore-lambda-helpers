@@ -12,6 +12,7 @@ export { HttpLambda } from './cdk/HttpLambda';
 export { EventLambda } from './cdk/EventLambda';
 export { Event } from './Event';
 export { EventLambdaHandler } from './EventLambdaHandler';
+export { putEvents, createPutEvents } from './putEvents';
 export { testUser, ITestUser } from './testUser';
 export { jsonObjectSchemaGenerator, JSONObjectSchemaType } from './jsonObjectSchemaGenerator';
 export { Documentation, IDocumentation } from './Documentation';

@@ -1,33 +1,38 @@
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import { logger } from './logger';
 import uDelay from 'udelay';
+import { nanoid } from 'nanoid';
+import axios, { AxiosInstance } from 'axios';
 
 export interface ITestUser {
 	userId: string;
 	accessToken: string;
 	idToken: string;
 	refreshToken: string;
+	cognitoClient: AxiosInstance;
 }
 
 export const testUser = async (
 	props: {
 		cognito: CognitoIdentityServiceProvider;
 		clientId: string;
-		username: string;
-		password: string;
+		clientBaseURL: string;
 		keepUser?: boolean;
 	},
 	fn: (user: ITestUser) => void
 ) => {
+	const username = `${nanoid()}@${nanoid()}.com`;
+	const password = nanoid();
+
 	const signUpResponse = await props.cognito
 		.signUp({
 			ClientId: props.clientId,
-			Username: props.username,
-			Password: props.password,
+			Username: username,
+			Password: password,
 			UserAttributes: [
 				{
 					Name: 'email',
-					Value: props.username
+					Value: username
 				}
 			]
 		})
@@ -42,19 +47,27 @@ export const testUser = async (
 			ClientId: props.clientId,
 			AuthFlow: 'USER_PASSWORD_AUTH',
 			AuthParameters: {
-				USERNAME: props.username,
-				PASSWORD: props.password
+				USERNAME: username,
+				PASSWORD: password
 			}
 		})
 		.promise();
 
 	logger.info(signInResponse);
 
+	const cognitoClient = axios.create({
+		baseURL: props.clientBaseURL,
+		headers: {
+			Authorization: signInResponse.AuthenticationResult!.IdToken!
+		}
+	});
+
 	const user: ITestUser = {
 		userId: signUpResponse.UserSub,
 		accessToken: signInResponse.AuthenticationResult!.AccessToken!,
 		idToken: signInResponse.AuthenticationResult!.IdToken!,
-		refreshToken: signInResponse.AuthenticationResult!.RefreshToken!
+		refreshToken: signInResponse.AuthenticationResult!.RefreshToken!,
+		cognitoClient
 	};
 
 	const deleteUser = async () =>

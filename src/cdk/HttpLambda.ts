@@ -5,7 +5,13 @@ import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
 
 export interface HttpLambdaProps extends FunctionProps {
-	HttpLambdaHandler: {
+	HttpLambdaHandler: HttpLambda['HttpLambdaHandler'];
+	integrations: HttpLambda['integrations'];
+	tags?: Array<string>;
+}
+
+export class HttpLambda extends Function implements Documented {
+	public HttpLambdaHandler: {
 		tags?: Array<string>;
 		paramsJSONSchema?: object;
 		bodyJSONSchema?: object;
@@ -13,15 +19,6 @@ export interface HttpLambdaProps extends FunctionProps {
 		responseJSONSchema?: object;
 		method: string;
 	};
-	integrations: Array<{
-		resource: IResource;
-		options: MethodOptions;
-	}>;
-	tags?: Array<string>;
-}
-
-export class HttpLambda extends Function implements Documented {
-	public HttpLambdaHandler: HttpLambdaProps['HttpLambdaHandler'];
 	public integrations: Array<{
 		resource: IResource;
 		options: MethodOptions;
