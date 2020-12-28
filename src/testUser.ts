@@ -22,7 +22,7 @@ export const testUser = async (
 	fn: (user: ITestUser) => void
 ) => {
 	const username = `${nanoid()}@test.com`;
-	const password = nanoid();
+	const password = 'abcABC123!"£';
 
 	const signUpResponse = await props.cognito
 		.signUp({
