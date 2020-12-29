@@ -21,7 +21,7 @@ export class HttpLambda extends Function implements Documented {
 	};
 	public integrations: Array<{
 		resource: IResource;
-		options: MethodOptions;
+		options?: MethodOptions;
 	}>;
 
 	constructor(scope: Construct, id: string, props: HttpLambdaProps) {
@@ -67,7 +67,7 @@ export class HttpLambda extends Function implements Documented {
 					id: this.node.id,
 					type: 'endpoint',
 					jsonSchemas,
-					authorizationType: integration.options.authorizationType,
+					authorizationType: integration.options && integration.options.authorizationType,
 					method: this.HttpLambdaHandler.method,
 					path: integration.resource.path
 				})

@@ -2,13 +2,14 @@ import { Construct, Stack } from '@aws-cdk/core';
 import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 import { IDocumentation, Documentation } from '../Documentation';
-import { Rule } from '@aws-cdk/aws-events';
+import { Rule, RuleProps } from '@aws-cdk/aws-events';
 import { Documented } from './DocumentationItems';
 
 export interface EventLambdaProps extends FunctionProps {
 	EventLambdaHandler: EventLambda['EventLambdaHandler'];
 	source: string;
 	tags?: Array<string>;
+	eventPattern?: RuleProps['eventPattern'];
 }
 
 export class EventLambda extends Function implements Documented {
@@ -24,7 +25,8 @@ export class EventLambda extends Function implements Documented {
 		new Rule(this, `${id}Rule`, {
 			eventPattern: {
 				source: [props.source],
-				detailType: this.EventLambdaHandler.detailType
+				detailType: this.EventLambdaHandler.detailType,
+				...props.eventPattern
 			},
 			targets: [new LambdaFunction(this)]
 		});

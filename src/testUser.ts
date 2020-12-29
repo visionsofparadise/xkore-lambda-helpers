@@ -83,7 +83,7 @@ export const testUser = async (
 
 		await deleteUser();
 	} catch (error) {
-		logger.info(error);
+		logger.info(error.message || error.data || error);
 
 		await deleteUser();
 
