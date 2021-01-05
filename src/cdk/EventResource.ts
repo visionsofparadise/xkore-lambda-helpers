@@ -34,7 +34,7 @@ export class EventResource<Detail extends object> extends Construct implements D
 		return [
 			new Documentation({
 				...props,
-				id: this.node.id,
+				documentationName: this.node.id,
 				type: 'event',
 				jsonSchemas
 			})

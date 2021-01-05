@@ -13,7 +13,7 @@ const db = dbClient(documentClient, 'test');
 
 const testDocumentation = () =>
 	new Documentation({
-		id: 'test',
+		documentationName: 'test',
 		type: 'item',
 		service: 'test',
 		stage: 'test',

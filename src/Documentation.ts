@@ -11,6 +11,8 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 });
 
 export interface IDocumentation extends IItem {
+	documentationName: string;
+	documentationId: string;
 	service: string;
 	stage: string;
 	type: 'endpoint' | 'item' | 'event' | 'rule';
@@ -18,7 +20,6 @@ export interface IDocumentation extends IItem {
 	authorizationType?: string;
 	path?: string;
 	method?: string;
-	id: string;
 	tags: Array<string>;
 	jsonSchemas: Array<string>;
 }
@@ -28,6 +29,8 @@ const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
 	description: 'Documentation containing deployment info and JSON schemas for items, events and more.',
 	properties: {
 		...Item.itemSchema.properties!,
+		documentationName: { type: 'string' },
+		documentationId: { type: 'string' },
 		service: { type: 'string' },
 		stage: { type: 'string' },
 		type: { type: 'string', nullable: true },
@@ -35,7 +38,6 @@ const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
 		authorizationType: { type: 'string', nullable: true },
 		path: { type: 'string', nullable: true },
 		method: { type: 'string', nullable: true },
-		id: { type: 'string' },
 		jsonSchemas: {
 			type: 'array',
 			items: { type: 'string' }
@@ -48,16 +50,19 @@ export class Documentation extends Item<IDocumentation> {
 	public static documentClient = documentClient;
 	public static tableName = 'test';
 	public static jsonSchema = jsonSchema;
-	public static hiddenKeys = [];
-	public static ownerKeys = [];
+	public static hiddenKeys: Array<keyof IDocumentation> = ['pk', 'sk'];
+	public static ownerKeys: Array<keyof IDocumentation> = [];
 
-	constructor({ id = nanoid(), ...params }: OptionalKeys<IDocumentation, keyof IItem | 'tags' | 'group'>) {
+	constructor({
+		documentationId = nanoid(),
+		...params
+	}: OptionalKeys<IDocumentation, keyof IItem | 'documentationId' | 'tags' | 'group'>) {
 		super(
 			{
 				...params,
 				pk: params.pk || Documentation.jsonSchema.title!,
-				sk: params.sk || `${params.stage}-${id}`,
-				id,
+				sk: params.sk || `${params.stage}-${params.documentationName}-${documentationId}`,
+				documentationId,
 				isSystemItem: true,
 				itemType: params.itemType || Documentation.jsonSchema.title!,
 				tags: params.tags || []
@@ -66,9 +71,13 @@ export class Documentation extends Item<IDocumentation> {
 		);
 	}
 
-	static pk = ({ id, stage }: Pick<IDocumentation, 'id' | 'stage'>) => ({
+	static pk = ({
+		documentationId,
+		stage,
+		documentationName
+	}: Pick<IDocumentation, 'documentationId' | 'stage' | 'documentationName'>) => ({
 		pk: Documentation.jsonSchema.title!,
-		sk: `${stage}-${id}`
+		sk: `${stage}-${documentationName}-${documentationId}`
 	});
 
 	static get = async (params: IPrimaryKey, db: ReturnType<typeof dbClient>) =>

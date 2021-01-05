@@ -48,7 +48,7 @@ export class EventLambda extends Function implements Documented {
 		return [
 			new Documentation({
 				...props,
-				id: this.node.id,
+				documentationName: this.node.id,
 				type: 'event',
 				jsonSchemas
 			})
