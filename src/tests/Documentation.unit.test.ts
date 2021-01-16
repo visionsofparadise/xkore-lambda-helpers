@@ -16,7 +16,6 @@ const testDocumentation = () =>
 		documentationName: 'test',
 		type: 'item',
 		service: 'test',
-		stage: 'test',
 		jsonSchemas: [JSON.stringify(testJSONSchema)]
 	});
 
@@ -33,7 +32,7 @@ it('creates and gets new documentation', async () => {
 it('lists documentation', async () => {
 	await testDocumentation().create();
 
-	const documentation = await Documentation.list({ stage: 'test' }, db);
+	const documentation = await Documentation.list(db);
 
 	expect(documentation.length).toBe(1);
 });

@@ -3,13 +3,12 @@ import { IDocumentation, Documentation } from '../Documentation';
 import { SeedItems } from './SeedItems';
 
 export interface Documented {
-	createDocumentation: (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => Array<Documentation>;
+	createDocumentation: (props: Pick<IDocumentation, 'service' | 'group'>) => Array<Documentation>;
 }
 
 export interface DocumentationItemsProps {
 	tableArn: string;
 	service: string;
-	stage: string;
 	groups: Array<{
 		name?: string;
 		items: Array<Documented>;
@@ -28,7 +27,6 @@ export class DocumentationItems extends Construct {
 			for (const item of group.items) {
 				const itemDocumentation = item.createDocumentation({
 					service: props.service,
-					stage: props.stage,
 					group: group.name
 				});
 

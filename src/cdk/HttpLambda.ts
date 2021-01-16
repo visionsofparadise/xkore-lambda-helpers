@@ -22,6 +22,7 @@ export class HttpLambda extends Function implements Documented {
 	public integrations: Array<{
 		resource: IResource;
 		options?: MethodOptions;
+		tags?: Array<string>;
 	}>;
 
 	constructor(scope: Construct, id: string, props: HttpLambdaProps) {
@@ -37,17 +38,17 @@ export class HttpLambda extends Function implements Documented {
 		}
 	}
 
-	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
+	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'group'>) => {
 		const stack = Stack.of(this);
 		const documentation = [];
 
 		const jsonSchemas = [];
 
 		const objectSchemas = [
-			this.HttpLambdaHandler.paramsJSONSchema,
-			this.HttpLambdaHandler.bodyJSONSchema,
-			this.HttpLambdaHandler.queryJSONSchema,
-			this.HttpLambdaHandler.responseJSONSchema
+			this.HttpLambdaHandler.paramsJSONSchema && { ...this.HttpLambdaHandler.paramsJSONSchema, title: 'Params' },
+			this.HttpLambdaHandler.bodyJSONSchema && { ...this.HttpLambdaHandler.bodyJSONSchema, title: 'Body' },
+			this.HttpLambdaHandler.queryJSONSchema && { ...this.HttpLambdaHandler.queryJSONSchema, title: 'Query' },
+			this.HttpLambdaHandler.responseJSONSchema && { ...this.HttpLambdaHandler.responseJSONSchema, title: 'Response' }
 		];
 
 		for (const schema of objectSchemas) {
@@ -68,11 +69,12 @@ export class HttpLambda extends Function implements Documented {
 					type: 'endpoint',
 					jsonSchemas,
 					authorizationType:
-						integration.options &&
-						integration.options.authorizer &&
-						(integration.options.authorizer.authorizationType || integration.options.authorizer.authorizerId),
+						integration.options && integration.options.authorizer
+							? integration.options.authorizer.authorizationType || integration.options.authorizer.authorizerId
+							: undefined,
 					method: this.HttpLambdaHandler.method,
-					path: integration.resource.path
+					path: integration.resource.path,
+					tags: integration.tags ? [...this.HttpLambdaHandler.tags!, ...integration.tags!] : this.HttpLambdaHandler.tags
 				})
 			);
 		}

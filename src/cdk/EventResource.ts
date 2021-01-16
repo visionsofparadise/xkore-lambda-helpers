@@ -18,7 +18,7 @@ export class EventResource<Detail extends object> extends Construct implements D
 		if (props && props.tags) this.Event.tags = [...this.Event.tags, ...props.tags];
 	}
 
-	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
+	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'group'>) => {
 		const stack = Stack.of(this);
 
 		const jsonSchemas = [];
@@ -36,7 +36,8 @@ export class EventResource<Detail extends object> extends Construct implements D
 				...props,
 				documentationName: this.node.id,
 				type: 'event',
-				jsonSchemas
+				jsonSchemas,
+				tags: this.Event.tags
 			})
 		];
 	};

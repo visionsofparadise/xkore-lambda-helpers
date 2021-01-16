@@ -14,11 +14,11 @@ export const jsonObjectSchemaGenerator = <Data extends object>(
 	});
 
 	const jsonSchema = ({
+		additionalProperties: true,
 		...schema,
 		type: schema.type || 'object',
 		properties: schema.properties,
-		required: requiredKeys,
-		additionalProperties: false
+		required: requiredKeys
 	} as unknown) as JSONSchemaType<Data>;
 
 	return jsonSchema;

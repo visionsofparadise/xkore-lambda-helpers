@@ -13,13 +13,14 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 export interface IDocumentation extends IItem {
 	documentationName: string;
 	documentationId: string;
+	description?: string;
 	service: string;
-	stage: string;
 	type: 'endpoint' | 'item' | 'event' | 'rule';
 	group?: string;
 	authorizationType?: string;
 	path?: string;
 	method?: string;
+	detailTypes?: Array<string>;
 	tags: Array<string>;
 	jsonSchemas: Array<string>;
 }
@@ -32,12 +33,13 @@ const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
 		documentationName: { type: 'string' },
 		documentationId: { type: 'string' },
 		service: { type: 'string' },
-		stage: { type: 'string' },
+		description: { type: 'string', nullable: true },
 		type: { type: 'string', nullable: true },
 		group: { type: 'string', nullable: true },
 		authorizationType: { type: 'string', nullable: true },
 		path: { type: 'string', nullable: true },
 		method: { type: 'string', nullable: true },
+		detailTypes: { type: 'array', items: { type: 'string' }, nullable: true },
 		jsonSchemas: {
 			type: 'array',
 			items: { type: 'string' }
@@ -61,7 +63,7 @@ export class Documentation extends Item<IDocumentation> {
 			{
 				...params,
 				pk: params.pk || Documentation.jsonSchema.title!,
-				sk: params.sk || `${params.stage}-${params.documentationName}-${documentationId}`,
+				sk: params.sk || `${params.documentationName}-${documentationId}`,
 				documentationId,
 				isSystemItem: true,
 				itemType: params.itemType || Documentation.jsonSchema.title!,
@@ -73,11 +75,10 @@ export class Documentation extends Item<IDocumentation> {
 
 	static pk = ({
 		documentationId,
-		stage,
 		documentationName
-	}: Pick<IDocumentation, 'documentationId' | 'stage' | 'documentationName'>) => ({
+	}: Pick<IDocumentation, 'documentationId' | 'documentationName'>) => ({
 		pk: Documentation.jsonSchema.title!,
-		sk: `${stage}-${documentationName}-${documentationId}`
+		sk: `${documentationName}-${documentationId}`
 	});
 
 	static get = async (params: IPrimaryKey, db: ReturnType<typeof dbClient>) =>
@@ -85,13 +86,12 @@ export class Documentation extends Item<IDocumentation> {
 			.get<IDocumentation>({ Key: params })
 			.then(data => new Documentation(data));
 
-	static list = async (params: Pick<IDocumentation, 'stage'>, db: ReturnType<typeof dbClient>) =>
+	static list = async (db: ReturnType<typeof dbClient>) =>
 		db
 			.query<IDocumentation>({
-				KeyConditionExpression: `pk = :pk AND begins_with (sk, :stage)`,
+				KeyConditionExpression: `pk = :pk`,
 				ExpressionAttributeValues: {
-					':pk': Documentation.jsonSchema.title!,
-					':stage': params.stage
+					':pk': Documentation.jsonSchema.title!
 				}
 			})
 			.then(data => data.Items!.map(item => new Documentation(item)));

@@ -32,7 +32,7 @@ export class EventLambda extends Function implements Documented {
 		});
 	}
 
-	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
+	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'group'>) => {
 		const stack = Stack.of(this);
 
 		const jsonSchemas = [];
@@ -49,8 +49,10 @@ export class EventLambda extends Function implements Documented {
 			new Documentation({
 				...props,
 				documentationName: this.node.id,
-				type: 'event',
-				jsonSchemas
+				type: 'rule',
+				detailTypes: this.EventLambdaHandler.detailType,
+				jsonSchemas,
+				tags: this.EventLambdaHandler.tags
 			})
 		];
 	};

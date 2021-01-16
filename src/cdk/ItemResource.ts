@@ -22,7 +22,7 @@ export class ItemResource extends Construct implements Documented {
 		if (props && props.tags) this.Item.tags = [...this.Item.tags, ...props.tags];
 	}
 
-	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'stage' | 'group'>) => {
+	public createDocumentation = (props: Pick<IDocumentation, 'service' | 'group'>) => {
 		const stack = Stack.of(this);
 
 		return [
@@ -34,7 +34,8 @@ export class ItemResource extends Construct implements Documented {
 					stack.toJsonString({
 						value: this.Item.jsonSchema
 					})
-				]
+				],
+				tags: this.Item.tags
 			})
 		];
 	};
