@@ -82,7 +82,9 @@ export class HttpLambda extends Function implements Documented {
 							? integration.options.authorizer.authorizationType || integration.options.authorizer.authorizerId
 							: undefined,
 					method: this.HttpLambdaHandler.method,
-					url: this.urlList.filter(api => api.restApiId === integration.resource.api.restApiId)[0].url,
+					url:
+						this.urlList.filter(api => api.restApiId === integration.resource.api.restApiId)[0].url +
+						integration.resource.path,
 					tags: integration.tags ? [...this.HttpLambdaHandler.tags!, ...integration.tags!] : this.HttpLambdaHandler.tags
 				})
 			);
