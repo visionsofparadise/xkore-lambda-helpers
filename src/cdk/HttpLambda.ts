@@ -6,6 +6,7 @@ import { Documented } from './DocumentationItems';
 
 export interface HttpLambdaProps extends FunctionProps {
 	HttpLambdaHandler: HttpLambda['HttpLambdaHandler'];
+	basePath: string;
 	integrations: HttpLambda['integrations'];
 	tags?: Array<string>;
 }
@@ -24,12 +25,14 @@ export class HttpLambda extends Function implements Documented {
 		options?: MethodOptions;
 		tags?: Array<string>;
 	}>;
+	public basePath: string;
 
 	constructor(scope: Construct, id: string, props: HttpLambdaProps) {
 		super(scope, id, props);
 
 		this.HttpLambdaHandler = props.HttpLambdaHandler;
 		this.integrations = props.integrations;
+		this.basePath = props.basePath;
 
 		if (props.tags) this.HttpLambdaHandler.tags = [...this.HttpLambdaHandler.tags!, ...props.tags];
 
@@ -74,6 +77,7 @@ export class HttpLambda extends Function implements Documented {
 							: undefined,
 					method: this.HttpLambdaHandler.method,
 					path: integration.resource.path,
+					basePath: this.basePath,
 					tags: integration.tags ? [...this.HttpLambdaHandler.tags!, ...integration.tags!] : this.HttpLambdaHandler.tags
 				})
 			);

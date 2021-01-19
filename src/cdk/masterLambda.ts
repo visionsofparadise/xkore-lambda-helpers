@@ -3,7 +3,9 @@ import { Construct } from '@aws-cdk/core';
 import { EventLambda, EventLambdaProps } from './EventLambda';
 import { HttpLambda, HttpLambdaProps } from './HttpLambda';
 
-export const masterLambda = (masterConfig: Pick<FunctionProps, 'code' | 'runtime'>) => {
+export const masterLambda = (
+	masterConfig: Pick<FunctionProps, 'code' | 'runtime'> & Pick<HttpLambdaProps, 'basePath'>
+) => {
 	return {
 		createLambda: (scope: Construct, id: string, config: Omit<FunctionProps, 'handler' | 'code' | 'runtime'>) =>
 			new Function(scope, id, {
@@ -12,7 +14,11 @@ export const masterLambda = (masterConfig: Pick<FunctionProps, 'code' | 'runtime
 				handler: `${id}.handler`
 			}),
 
-		createHttpLambda: (scope: Construct, id: string, config: Omit<HttpLambdaProps, 'handler' | 'code' | 'runtime'>) =>
+		createHttpLambda: (
+			scope: Construct,
+			id: string,
+			config: Omit<HttpLambdaProps, 'handler' | 'code' | 'runtime' | 'basePath'>
+		) =>
 			new HttpLambda(scope, id, {
 				...masterConfig,
 				...config,

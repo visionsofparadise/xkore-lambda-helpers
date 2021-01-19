@@ -19,6 +19,7 @@ export interface IDocumentation extends IItem {
 	group?: string;
 	authorizationType?: string;
 	path?: string;
+	basePath?: string;
 	method?: string;
 	detailTypes?: Array<string>;
 	tags: Array<string>;
@@ -38,6 +39,7 @@ const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
 		group: { type: 'string', nullable: true },
 		authorizationType: { type: 'string', nullable: true },
 		path: { type: 'string', nullable: true },
+		basePath: { type: 'string', nullable: true },
 		method: { type: 'string', nullable: true },
 		detailTypes: { type: 'array', items: { type: 'string' }, nullable: true },
 		jsonSchemas: {
