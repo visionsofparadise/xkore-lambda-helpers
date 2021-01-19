@@ -6,7 +6,10 @@ import { Documented } from './DocumentationItems';
 
 export interface HttpLambdaProps extends FunctionProps {
 	HttpLambdaHandler: HttpLambda['HttpLambdaHandler'];
-	basePath: string;
+	urlList: Array<{
+		restApiId: string;
+		url: string;
+	}>;
 	integrations: HttpLambda['integrations'];
 	tags?: Array<string>;
 }
@@ -25,14 +28,17 @@ export class HttpLambda extends Function implements Documented {
 		options?: MethodOptions;
 		tags?: Array<string>;
 	}>;
-	public basePath: string;
+	public urlList: Array<{
+		restApiId: string;
+		url: string;
+	}>;
 
 	constructor(scope: Construct, id: string, props: HttpLambdaProps) {
 		super(scope, id, props);
 
 		this.HttpLambdaHandler = props.HttpLambdaHandler;
 		this.integrations = props.integrations;
-		this.basePath = props.basePath;
+		this.urlList = props.urlList;
 
 		if (props.tags) this.HttpLambdaHandler.tags = [...this.HttpLambdaHandler.tags!, ...props.tags];
 
@@ -76,8 +82,7 @@ export class HttpLambda extends Function implements Documented {
 							? integration.options.authorizer.authorizationType || integration.options.authorizer.authorizerId
 							: undefined,
 					method: this.HttpLambdaHandler.method,
-					path: integration.resource.path,
-					basePath: this.basePath,
+					url: this.urlList.filter(api => api.restApiId === integration.resource.api.restApiId)[0].url,
 					tags: integration.tags ? [...this.HttpLambdaHandler.tags!, ...integration.tags!] : this.HttpLambdaHandler.tags
 				})
 			);
