@@ -11,6 +11,7 @@ export interface ApiKeyApiProps extends ApiProps {
 
 export class ApiKeyApi extends Api {
 	public readonly apiKeyApi: RestApi;
+	public readonly apiKeyApiURL: Api['url'];
 	public readonly apiKeyAuthorizer: ApiKeyAuthorizer;
 
 	constructor(scope: Stack, id: string, props: ApiKeyApiProps) {
@@ -22,6 +23,7 @@ export class ApiKeyApi extends Api {
 		});
 
 		this.apiKeyApi = this.api;
+		this.apiKeyApiURL = this.url;
 
 		if (props.isImported) {
 			new CfnPermission(this, 'authorizerPermission', {
