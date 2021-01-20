@@ -34,7 +34,7 @@ export class Api extends Construct {
 		this.url = {
 			restApiId: restApi.restApiId,
 			baseURL: restApi.url,
-			basePath: ''
+			basePath: '/'
 		};
 
 		if (props.stage === 'prod') {
@@ -49,7 +49,7 @@ export class Api extends Construct {
 			this.url = {
 				restApiId: restApi.restApiId,
 				baseURL: 'https://' + props.domainName + '/',
-				basePath: props.basePath
+				basePath: props.basePath + '/'
 			};
 		}
 	}

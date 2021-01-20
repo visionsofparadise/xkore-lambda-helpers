@@ -9,7 +9,7 @@ export interface CognitoApiProps extends ApiProps {
 
 export class CognitoApi extends Api {
 	public readonly cognitoApi: RestApi;
-	public readonly cognitoApiURL: Api['url'];
+	public readonly cognitoApiURLPaths: Api['url'];
 	public readonly cognitoAuthorizer: CognitoAuthorizer;
 
 	constructor(scope: Construct, id: string, props: CognitoApiProps) {
@@ -21,6 +21,6 @@ export class CognitoApi extends Api {
 		});
 
 		this.cognitoApi = this.api;
-		this.cognitoApiURL = this.url;
+		this.cognitoApiURLPaths = this.url;
 	}
 }
