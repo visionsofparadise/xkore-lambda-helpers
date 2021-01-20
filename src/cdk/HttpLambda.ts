@@ -3,13 +3,11 @@ import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
 import { IResource, LambdaIntegration, MethodOptions } from '@aws-cdk/aws-apigateway';
 import { IDocumentation, Documentation } from '../Documentation';
 import { Documented } from './DocumentationItems';
+import { Api } from './Api';
 
 export interface HttpLambdaProps extends FunctionProps {
 	HttpLambdaHandler: HttpLambda['HttpLambdaHandler'];
-	urlList: Array<{
-		restApiId: string;
-		url: string;
-	}>;
+	urlList: Array<Api['url']>;
 	integrations: HttpLambda['integrations'];
 	tags?: Array<string>;
 }
@@ -28,10 +26,7 @@ export class HttpLambda extends Function implements Documented {
 		options?: MethodOptions;
 		tags?: Array<string>;
 	}>;
-	public urlList: Array<{
-		restApiId: string;
-		url: string;
-	}>;
+	public urlList: Array<Api['url']>;
 
 	constructor(scope: Construct, id: string, props: HttpLambdaProps) {
 		super(scope, id, props);
@@ -71,6 +66,8 @@ export class HttpLambda extends Function implements Documented {
 		}
 
 		for (const integration of this.integrations) {
+			const url = this.urlList.filter(urlObj => urlObj.restApiId === integration.resource.api.restApiId)[0];
+
 			documentation.push(
 				new Documentation({
 					...props,
@@ -82,9 +79,9 @@ export class HttpLambda extends Function implements Documented {
 							? integration.options.authorizer.authorizationType || integration.options.authorizer.authorizerId
 							: undefined,
 					method: this.HttpLambdaHandler.method,
-					url:
-						this.urlList.filter(api => api.restApiId === integration.resource.api.restApiId)[0].url +
-						integration.resource.path,
+					baseURL: url.baseURL,
+					basePath: url.basePath,
+					path: integration.resource.path,
 					tags: integration.tags ? [...this.HttpLambdaHandler.tags!, ...integration.tags!] : this.HttpLambdaHandler.tags
 				})
 			);

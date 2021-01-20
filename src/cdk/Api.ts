@@ -13,6 +13,11 @@ export interface ApiProps {
 
 export class Api extends Construct {
 	public readonly api: RestApi;
+	public url: {
+		restApiId: string;
+		baseURL: string;
+		basePath: string;
+	};
 
 	constructor(scope: Construct, id: string, props: ApiProps) {
 		super(scope, id);
@@ -25,6 +30,13 @@ export class Api extends Construct {
 			}
 		});
 
+		this.api = restApi;
+		this.url = {
+			restApiId: restApi.restApiId,
+			baseURL: restApi.url,
+			basePath: ''
+		};
+
 		if (props.stage === 'prod') {
 			new DomainBasePathMapping(this, 'basePathMapping', {
 				domainName: props.domainName,
@@ -33,8 +45,12 @@ export class Api extends Construct {
 				domainNameAliasHostedZoneId: props.aliasHostedZoneId,
 				restApi
 			});
-		}
 
-		this.api = restApi;
+			this.url = {
+				restApiId: restApi.restApiId,
+				baseURL: 'https://' + props.domainName + '/',
+				basePath: props.basePath
+			};
+		}
 	}
 }
