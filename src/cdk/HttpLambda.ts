@@ -81,7 +81,7 @@ export class HttpLambda extends Function implements Documented {
 					method: this.HttpLambdaHandler.method,
 					baseURL: url.baseURL,
 					basePath: url.basePath,
-					path: integration.resource.path.length > 1 ? integration.resource.path.slice(1) : '',
+					path: integration.resource.path,
 					tags: integration.tags ? [...this.HttpLambdaHandler.tags!, ...integration.tags!] : this.HttpLambdaHandler.tags
 				})
 			);
