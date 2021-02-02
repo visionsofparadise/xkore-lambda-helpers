@@ -40,10 +40,14 @@ export class Event<Detail extends object> {
 
 		logger.info({ entries });
 
-		this._eventbridge
+		const result = await this._eventbridge
 			.putEvents({
 				Entries: entries
 			})
 			.promise();
+
+		logger.info({ result });
+
+		return result;
 	};
 }
