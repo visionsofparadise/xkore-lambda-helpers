@@ -65,6 +65,26 @@ it('puts item', async () => {
 	expect(upick(Item, ['pk', 'sk', 'testAttribute'])).toStrictEqual(input);
 });
 
+it('throws if item exists and has isNew', async () => {
+	const input = testData();
+
+	await db.put(
+		{
+			Item: input
+		},
+		true
+	);
+
+	await db
+		.put(
+			{
+				Item: input
+			},
+			true
+		)
+		.catch(error => expect(error).toBeDefined());
+});
+
 it('updates an attribute on an item', async () => {
 	const input = testData();
 

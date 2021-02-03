@@ -2,6 +2,7 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { logger } from './logger';
 import { IPrimaryKey, IItem } from './Item';
 import { Response, BAD_REQUEST_400 } from './Response';
+import upick from 'upick';
 
 type WithDefaults<I> = Omit<I, 'TableName'>;
 
@@ -32,27 +33,33 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		put: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.PutItemInput>, isNew?: boolean) => {
 			logger.info({ query });
 
-			const data = ((await documentClient
-				.put({
-					...queryDefaults,
-					...query,
-					ConditionExpression:
-						isNew && !query.ConditionExpression ? 'attribute_not_exists(pk) AND attribute_not_exists(sk)' : undefined,
-					Item: {
-						...query.Item
-					}
-				})
-				.promise()
-				.then(result => result.Attributes)
-				.catch(error => {
-					logger.error({ error });
+			const putData = async () =>
+				((await documentClient
+					.put({
+						...queryDefaults,
+						...query
+					})
+					.promise()
+					.then(result => result.Attributes)) as unknown) as Promise<Data>;
 
-					if (error.code === 'ConditionalCheckFailedException' && isNew) {
+			let data;
+
+			if (isNew) {
+				await documentClient
+					.get({
+						...queryDefaults,
+						Key: upick(query.Item, ['pk', 'sk'])
+					})
+					.promise()
+					.then(() => {
 						throw new Response(BAD_REQUEST_400('Item already exists'));
-					}
-
-					throw error;
-				})) as unknown) as Promise<Data>;
+					})
+					.catch(async () => {
+						data = await putData();
+					});
+			} else {
+				data = await putData();
+			}
 
 			logger.info({ data });
 
