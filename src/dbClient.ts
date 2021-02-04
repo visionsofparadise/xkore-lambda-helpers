@@ -20,7 +20,14 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		get: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.GetItemInput>) => {
 			logger.info({ query });
 
-			const data = await documentClient.get({ ...queryDefaults, ...query }).promise();
+			const data = await documentClient
+				.get({ ...queryDefaults, ...query })
+				.promise()
+				.catch(err => {
+					logger.error({ err });
+
+					throw new Response(NOT_FOUND_404);
+				});
 
 			if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) throw new Response(NOT_FOUND_404);
 
