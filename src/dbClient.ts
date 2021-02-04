@@ -102,20 +102,16 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		delete: async (query: WithDefaults<DocumentClient.DeleteItemInput>) => {
 			logger.info({ query });
 
-			try {
-				await client.get({
-					Key: upick(query.Key, ['pk', 'sk'])
-				});
+			await client.get({
+				Key: upick(query.Key, ['pk', 'sk'])
+			});
 
-				return documentClient
-					.delete({
-						...queryDefaults,
-						...query
-					})
-					.promise();
-			} catch (err) {
-				throw new Response(BAD_REQUEST_400('Item does not exist'));
-			}
+			return documentClient
+				.delete({
+					...queryDefaults,
+					...query
+				})
+				.promise();
 		},
 
 		reset: async () => {
