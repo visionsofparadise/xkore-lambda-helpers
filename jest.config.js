@@ -9,3 +9,4 @@ module.exports = {
 };
 
 process.env.DYNAMODB_TABLE = 'test';
+process.env.STAGE = 'test';

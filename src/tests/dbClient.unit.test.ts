@@ -36,6 +36,7 @@ it('gets item', async () => {
 });
 
 it('throws on item not found', async () => {
+	expect.assertions(1);
 	const input = testData();
 
 	await db

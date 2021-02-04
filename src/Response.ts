@@ -6,6 +6,15 @@ export interface IResponse {
 	headers?: Required<{}>;
 }
 
+// interface DynamoDBError {
+// 	statusCode: number;
+// 	message: string
+// }
+
+// export const dynamoDBErrorMap = (error: DynamoDBError) => {
+
+// }
+
 export class Response implements IResponse {
 	public statusCode: number;
 	public body: any;
