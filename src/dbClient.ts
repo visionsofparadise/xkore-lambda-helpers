@@ -1,7 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { logger } from './logger';
 import { IPrimaryKey, IItem } from './Item';
-import { Response, BAD_REQUEST_400 } from './Response';
+import { Response, BAD_REQUEST_400, NOT_FOUND_404 } from './Response';
 import upick from 'upick';
 
 type WithDefaults<I> = Omit<I, 'TableName'>;
@@ -26,6 +26,8 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 				.then(result => result.Item)) as unknown) as Promise<Data>;
 
 			logger.info({ data });
+
+			if (!data) throw new Response(NOT_FOUND_404);
 
 			return data;
 		},
