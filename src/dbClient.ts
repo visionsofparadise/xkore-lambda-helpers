@@ -22,7 +22,8 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 
 			const data = await documentClient.get({ ...queryDefaults, ...query }).promise();
 
-			if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) throw new Response(NOT_FOUND_404);
+			if (!data || !data.Item || (typeof data === 'object' && Object.keys(data).length === 0))
+				throw new Response(NOT_FOUND_404);
 
 			logger.info({ data });
 
@@ -44,16 +45,15 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 			let data;
 
 			if (isNew) {
-				await client
+				const result = await client
 					.get({
 						Key: upick(query.Item, ['pk', 'sk'])
-					})
-					.then(() => {
-						throw new Response(BAD_REQUEST_400('Item already exists'));
 					})
 					.catch(async () => {
 						data = await putData();
 					});
+
+				if (result) throw new Response(BAD_REQUEST_400('Item already exists'));
 			} else {
 				data = await putData();
 			}
@@ -66,13 +66,13 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		update: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.UpdateItemInput>) => {
 			logger.info({ query });
 
-			const data = ((await documentClient
+			const data = await documentClient
 				.update({
 					...queryDefaults,
 					...query
 				})
 				.promise()
-				.then(result => result.Attributes)) as unknown) as Promise<Data>;
+				.then(result => result.Attributes as Data);
 
 			logger.info({ data });
 
@@ -117,9 +117,6 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 
 			for (const data of scanData.Items!) {
 				if (!data.isSystemItem) {
-					logger.info('deleting item');
-					logger.info(data);
-
 					await client.delete({
 						Key: {
 							pk: data.pk,
