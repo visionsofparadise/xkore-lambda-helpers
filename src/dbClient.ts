@@ -36,26 +36,28 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 			logger.info({ query });
 
 			const putData = async () =>
-				((await documentClient
+				documentClient
 					.put({
 						...queryDefaults,
 						...query
 					})
 					.promise()
-					.then(result => result.Attributes)) as unknown) as Promise<Data>;
+					.then(result => result.Attributes as Data);
 
 			let data;
 
 			if (isNew) {
-				try {
-					await client.get({
+				await client
+					.get({
 						Key: upick(query.Item, ['pk', 'sk'])
+					})
+					.then(() => {
+						throw new Response(BAD_REQUEST_400('Item already exists'));
+					})
+					.catch(async err => {
+						if (err.statusCode === 404) data = await putData();
+						else throw err;
 					});
-
-					throw new Response(BAD_REQUEST_400('Item already exists'));
-				} catch (err) {
-					data = await putData();
-				}
 			} else {
 				data = await putData();
 			}
