@@ -102,9 +102,7 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		delete: async (query: WithDefaults<DocumentClient.DeleteItemInput>) => {
 			logger.info({ query });
 
-			await client.get({
-				Key: upick(query.Key, ['pk', 'sk'])
-			});
+			await client.get(query);
 
 			return documentClient
 				.delete({
