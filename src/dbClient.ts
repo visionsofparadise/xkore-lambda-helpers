@@ -1,7 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { logger } from './logger';
 import { IPrimaryKey, IItem } from './Item';
-import { Response, BAD_REQUEST_400, NOT_FOUND_404 } from './Response';
+import { Response, NOT_FOUND_404, BAD_REQUEST_400 } from './Response';
 import upick from 'upick';
 
 type WithDefaults<I> = Omit<I, 'TableName'>;
@@ -30,37 +30,37 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 			return data.Item as Promise<Data>;
 		},
 
-		put: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.PutItemInput>, isNew?: boolean) => {
+		put: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.PutItemInput>) => {
 			logger.info({ query });
 
-			const putData = async () =>
-				documentClient
-					.put({
-						...queryDefaults,
-						...query
-					})
-					.promise()
-					.then(result => result.Attributes as Data);
-
-			let data;
-
-			if (isNew) {
-				const result = await client
-					.get({
-						Key: upick(query.Item, ['pk', 'sk'])
-					})
-					.catch(async () => {
-						data = await putData();
-					});
-
-				if (result) throw new Response(BAD_REQUEST_400('Item already exists'));
-			} else {
-				data = await putData();
-			}
+			const data = await documentClient
+				.put({
+					...queryDefaults,
+					...query
+				})
+				.promise()
+				.then(result => result.Attributes as Data);
 
 			logger.info({ data });
 
 			return data;
+		},
+
+		create: async (query: WithDefaults<DocumentClient.PutItemInput>) => {
+			logger.info({ query });
+
+			try {
+				await client.get({
+					Key: upick(query.Item, ['pk', 'sk'])
+				});
+
+				throw new Response(BAD_REQUEST_400('Item already exists'));
+			} catch (error) {
+				return client.put({
+					...queryDefaults,
+					...query
+				});
+			}
 		},
 
 		update: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.UpdateItemInput>) => {

@@ -122,15 +122,16 @@ export class Item<Schema extends IItem> {
 		return upick(this._current, ['pk', 'sk']);
 	}
 
-	public save = async (isNew: boolean = false) => {
+	public save = async (create = false) => {
 		this.validate();
 
-		await this._db.put(
-			{
-				Item: this._current
-			},
-			isNew
-		);
+		create
+			? await this._db.put({
+					Item: this._current
+			  })
+			: await this._db.create({
+					Item: this._current
+			  });
 
 		return this;
 	};
