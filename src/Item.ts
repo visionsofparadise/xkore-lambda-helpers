@@ -79,8 +79,8 @@ export class Item<Schema extends IItem> {
 
 		const attributes = {
 			...props,
-			createdAt: props.createdAt || day().unix(),
-			updatedAt: props.updatedAt || day().unix(),
+			createdAt: props.createdAt || day().valueOf(),
+			updatedAt: props.updatedAt || day().valueOf(),
 			itemType: props.itemType || Item.itemSchema.title
 		} as Schema;
 
@@ -97,7 +97,7 @@ export class Item<Schema extends IItem> {
 	public set(data: Partial<Schema>) {
 		logger.info({ set: data });
 
-		const updatedAt = day().unix();
+		const updatedAt = day().valueOf();
 
 		this._current = { ...this._current, ...data, updatedAt };
 
