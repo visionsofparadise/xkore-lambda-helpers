@@ -51,8 +51,8 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 						Key: upick(query.Item, ['pk', 'sk'])
 					})
 					.promise()
-					.then(() => {
-						throw new Response(BAD_REQUEST_400('Item already exists'));
+					.then((data: object) => {
+						if (Object.keys(data).length === 0) throw new Response(BAD_REQUEST_400('Item already exists'));
 					})
 					.catch(async () => {
 						data = await putData();
