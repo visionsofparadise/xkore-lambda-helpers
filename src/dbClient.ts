@@ -20,14 +20,7 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		get: async <Data extends IPrimaryKey>(query: WithDefaults<DocumentClient.GetItemInput>) => {
 			logger.info({ query });
 
-			const data = await documentClient
-				.get({ ...queryDefaults, ...query })
-				.promise()
-				.catch(err => {
-					logger.error({ err });
-
-					throw new Response(NOT_FOUND_404);
-				});
+			const data = await documentClient.get({ ...queryDefaults, ...query }).promise();
 
 			if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) throw new Response(NOT_FOUND_404);
 
@@ -58,9 +51,8 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 					.then(() => {
 						throw new Response(BAD_REQUEST_400('Item already exists'));
 					})
-					.catch(async err => {
-						if (err.statusCode === 404) data = await putData();
-						else throw err;
+					.catch(async () => {
+						data = await putData();
 					});
 			} else {
 				data = await putData();
