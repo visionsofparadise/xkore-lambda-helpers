@@ -45,18 +45,15 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 			let data;
 
 			if (isNew) {
-				await documentClient
-					.get({
-						...queryDefaults,
+				try {
+					await client.get({
 						Key: upick(query.Item, ['pk', 'sk'])
-					})
-					.promise()
-					.then((data: object) => {
-						if (Object.keys(data).length === 0) throw new Response(BAD_REQUEST_400('Item already exists'));
-					})
-					.catch(async () => {
-						data = await putData();
 					});
+
+					throw new Response(BAD_REQUEST_400('Item already exists'));
+				} catch (err) {
+					data = await putData();
+				}
 			} else {
 				data = await putData();
 			}
@@ -101,13 +98,20 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		delete: async (query: WithDefaults<DocumentClient.DeleteItemInput>) => {
 			logger.info({ query });
 
-			return documentClient
-				.delete({
-					...queryDefaults,
-					...query,
-					ConditionExpression: query.ConditionExpression || 'attribute_exists(pk) AND attribute_exists(sk)'
-				})
-				.promise();
+			try {
+				await client.get({
+					Key: upick(query.Key, ['pk', 'sk'])
+				});
+
+				return documentClient
+					.delete({
+						...queryDefaults,
+						...query
+					})
+					.promise();
+			} catch (err) {
+				throw new Response(BAD_REQUEST_400('Item does not exist'));
+			}
 		},
 
 		reset: async () => {
