@@ -7,10 +7,10 @@ export type StreamFn = (r: Array<DynamoDBRecord>) => Promise<Array<any>>;
 export const eventNameFilter = (eventName: string) => (r: DynamoDBRecord): boolean =>
 	r.eventName === eventName && r.dynamodb ? true : false;
 
-export const resourceTypeFilter = (resourceType: string) => (r: DynamoDBRecord): boolean =>
-	r.dynamodb && r.dynamodb.NewImage && r.dynamodb.NewImage.resourceType.S === resourceType
+export const itemTypeFilter = (itemType: string) => (r: DynamoDBRecord): boolean =>
+	r.dynamodb && r.dynamodb.NewImage && r.dynamodb.NewImage.itemType.S === itemType
 		? true
-		: r.dynamodb && r.dynamodb.OldImage && r.dynamodb.OldImage.resourceType.S === resourceType
+		: r.dynamodb && r.dynamodb.OldImage && r.dynamodb.OldImage.itemType.S === itemType
 		? true
 		: false;
 
