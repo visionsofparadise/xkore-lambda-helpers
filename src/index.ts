@@ -29,5 +29,5 @@ export {
 	SUCCESS_NO_CONTENT_204,
 	UNAUTHORIZED_401
 } from './Response';
-export { StreamFn, eventNameFilter, resourceTypeFilter, streamMap } from './streamUtils';
+export { StreamFn, eventNameFilter, itemTypeFilter, streamMap } from './streamUtils';
 export { unmarshallRecords, Record, Records } from './unmarshallRecords';
