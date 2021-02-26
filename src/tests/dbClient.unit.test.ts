@@ -46,15 +46,12 @@ it('throws on item not found', async () => {
 		.catch(err => expect(err).toBeDefined());
 });
 
-it('puts item', async () => {
+it('creates item', async () => {
 	const input = testData();
 
-	await db.put(
-		{
-			Item: input
-		},
-		true
-	);
+	await db.create({
+		Item: input
+	});
 
 	const { Item } = ((await documentClient
 		.get({
@@ -69,20 +66,14 @@ it('puts item', async () => {
 it('throws if item exists and has isNew', async () => {
 	const input = testData();
 
-	await db.put(
-		{
-			Item: input
-		},
-		true
-	);
+	await db.create({
+		Item: input
+	});
 
 	await db
-		.put(
-			{
-				Item: input
-			},
-			true
-		)
+		.create({
+			Item: input
+		})
 		.catch(error => expect(error).toBeDefined());
 });
 
