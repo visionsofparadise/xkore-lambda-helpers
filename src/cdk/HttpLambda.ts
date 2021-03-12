@@ -87,6 +87,6 @@ export class HttpLambda extends Function implements Documented {
 			);
 		}
 
-		return documentation;
+		return documentation.map(doc => doc.data);
 	};
 }

@@ -1,5 +1,5 @@
 import { DynamoDBRecord } from 'aws-lambda/trigger/dynamodb-stream';
-import { logger } from './logger';
+import { logger } from './helpers/logger';
 import { Records, Record } from './unmarshallRecords';
 
 export type StreamFn = (r: Array<DynamoDBRecord>) => Promise<Array<any>>;

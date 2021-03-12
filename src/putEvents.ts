@@ -1,5 +1,5 @@
 import { EventBridge } from 'aws-sdk';
-import { logger } from './logger';
+import { logger } from './helpers/logger';
 
 export const putEvents = async (eventbridge: EventBridge, source: string, events: Array<{ 0: string; 1: object }>) => {
 	logger.info({ events });

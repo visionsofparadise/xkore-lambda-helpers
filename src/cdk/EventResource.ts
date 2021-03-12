@@ -38,7 +38,7 @@ export class EventResource<Detail extends object> extends Construct implements D
 				type: 'event',
 				jsonSchemas,
 				tags: this.Event.tags
-			})
+			}).data
 		];
 	};
 }

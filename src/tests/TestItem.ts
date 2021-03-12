@@ -1,7 +1,7 @@
-import { IItem, RequiredKeys, Item } from '../Item';
+import { IItem, RequiredKeys, Item, itemSchema } from '../Item';
 import AWS from 'aws-sdk';
-import { nanoid } from 'nanoid';
-import { jsonObjectSchemaGenerator } from '../jsonObjectSchemaGenerator';
+import kuuid from 'kuuid';
+import { JSONSchemaType } from 'ajv';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
 	endpoint: 'localhost:8000',
@@ -13,31 +13,36 @@ export interface ITestItem extends IItem {
 	testAttribute: string;
 }
 
-const jsonSchema = jsonObjectSchemaGenerator<ITestItem>({
+export const testItemJSONSchema: JSONSchemaType<ITestItem> = {
 	title: 'TestItem',
 	description: 'Test item',
+	type: 'object',
 	properties: {
-		...Item.itemSchema.properties!,
+		...itemSchema.properties!,
 		testAttribute: { type: 'string' }
-	}
-});
+	},
+	required: ['testAttribute']
+};
 
-export class TestItem extends Item<ITestItem> {
-	public static documentClient = documentClient;
-	public static tableName = 'test';
-	public static jsonSchema = jsonSchema;
-	public static hiddenKeys = [];
-	public static ownerKeys = [];
+const hiddenKeys = Item.keys([]);
+const ownerKeys = Item.keys([]);
 
+export class TestItem extends Item<ITestItem, typeof hiddenKeys[number], typeof ownerKeys[number]> {
 	constructor(params: RequiredKeys<ITestItem, 'testAttribute'>) {
 		super(
 			{
 				...params,
-				pk: params.pk || nanoid(),
-				sk: params.sk || TestItem.jsonSchema.title!,
-				itemType: params.itemType || TestItem.jsonSchema.title!
+				pk: params.pk || kuuid.id(),
+				sk: params.sk || testItemJSONSchema.title!,
+				itemType: params.itemType || testItemJSONSchema.title!
 			},
-			TestItem
+			{
+				documentClient: documentClient,
+				tableName: 'test',
+				jsonSchema: testItemJSONSchema,
+				hiddenKeys: hiddenKeys,
+				ownerKeys: ownerKeys
+			}
 		);
 	}
 }

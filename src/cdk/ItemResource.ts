@@ -36,7 +36,7 @@ export class ItemResource extends Construct implements Documented {
 					})
 				],
 				tags: this.Item.tags
-			})
+			}).data
 		];
 	};
 }

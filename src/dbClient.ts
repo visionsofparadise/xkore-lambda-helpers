@@ -1,8 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { logger } from './logger';
+import { logger } from './helpers/logger';
 import { IPrimaryKey, IItem } from './Item';
 import { Response, NOT_FOUND_404, BAD_REQUEST_400 } from './Response';
-import upick from 'upick';
 
 type WithDefaults<I> = Omit<I, 'TableName'>;
 
@@ -49,9 +48,11 @@ export const dbClient = (documentClient: DocumentClient, tableName: string) => {
 		create: async (query: WithDefaults<DocumentClient.PutItemInput>) => {
 			logger.info({ query });
 
+			const { pk, sk } = query.Item;
+
 			try {
 				await client.get({
-					Key: upick(query.Item, ['pk', 'sk'])
+					Key: { pk, sk }
 				});
 
 				throw new Response(BAD_REQUEST_400('Item already exists'));
