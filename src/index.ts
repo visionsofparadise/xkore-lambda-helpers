@@ -16,7 +16,7 @@ export { putEvents, createPutEvents } from './putEvents';
 export { testUser, ITestUser } from './testUser';
 export { testApiKey } from './testApiKey';
 export { Documentation, IDocumentation } from './Documentation';
-export { IItem, IPrimaryKey, Item, RequiredKeys, OptionalKeys, primaryKeySchema, itemSchema } from './Item';
+export { IItem, IPrimaryKey, Item, RequiredKeys, OptionalKeys } from './Item';
 export { dbClient } from './dbClient';
 export { HttpLambdaHandler } from './HttpLambdaHandler';
 export {
