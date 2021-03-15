@@ -1,6 +1,6 @@
 import { IItem, RequiredKeys, Item } from '../Item';
 import AWS from 'aws-sdk';
-import { nanoid } from 'nanoid';
+import kuuid from 'kuuid';
 import { jsonObjectSchemaGenerator } from '../jsonObjectSchemaGenerator';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
@@ -33,7 +33,7 @@ export class TestItem extends Item<ITestItem> {
 		super(
 			{
 				...params,
-				pk: params.pk || nanoid(),
+				pk: params.pk || kuuid.id(),
 				sk: params.sk || TestItem.jsonSchema.title!,
 				itemType: params.itemType || TestItem.jsonSchema.title!
 			},

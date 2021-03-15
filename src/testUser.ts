@@ -1,7 +1,7 @@
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import { logger } from './logger';
 import uDelay from 'udelay';
-import { nanoid } from 'nanoid';
+import kuuid from 'kuuid';
 import axios, { AxiosInstance } from 'axios';
 
 export interface ITestUser {
@@ -21,7 +21,7 @@ export const testUser = async (
 	},
 	fn: (user: ITestUser) => void
 ) => {
-	const username = `${nanoid()}@test.com`;
+	const username = `${kuuid.id()}@test.com`;
 	const password = 'abcABC123!"£';
 
 	const signUpResponse = await props.cognito

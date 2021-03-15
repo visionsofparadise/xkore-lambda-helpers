@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 import upick from 'upick';
 import { IItem } from '../Item';
 import { dbClient } from '../dbClient';
-import { nanoid } from 'nanoid';
+import kuuid from 'kuuid';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
 	endpoint: 'localhost:8000',
@@ -13,8 +13,8 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 const db = dbClient(documentClient, 'test');
 
 const testData = () => ({
-	pk: nanoid(),
-	sk: nanoid(),
+	pk: kuuid.id(),
+	sk: kuuid.id(),
 	testAttribute: 'test'
 });
 

@@ -2,7 +2,7 @@ import { dbClient } from './dbClient';
 import upick from 'upick';
 import uomit from 'uomit';
 import day from 'dayjs';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType, ValidateFunction } from 'ajv';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { jsonObjectSchemaGenerator } from './jsonObjectSchemaGenerator';
 import { logger } from './logger';
@@ -42,7 +42,8 @@ export const itemSchema = jsonObjectSchemaGenerator<IItem>({
 		isSystemItem: { type: 'boolean', nullable: true },
 		createdAt: { type: 'number' },
 		updatedAt: { type: 'number' }
-	}
+	},
+	additionalProperties: true
 });
 
 export class Item<Schema extends IItem> {
@@ -52,10 +53,14 @@ export class Item<Schema extends IItem> {
 	public static readonly jsonSchema: object;
 
 	protected _jsonSchema: JSONSchemaType<Schema>;
-	protected _validatorFn: (data: Schema) => boolean;
+	protected _validator: ValidateFunction<Schema>;
 	protected _hiddenKeys: Array<keyof Schema>;
 	protected _ownerKeys: Array<keyof Schema>;
 	protected _db: ReturnType<typeof dbClient>;
+	protected _onValidate: () => Promise<void> | void;
+	protected _onSave: () => Promise<void> | void;
+	protected _onCreate: () => Promise<void> | void;
+	protected _onDelete: () => Promise<void> | void;
 
 	protected _initial: Schema;
 	protected _current: Schema;
@@ -69,18 +74,27 @@ export class Item<Schema extends IItem> {
 			ownerKeys: Array<keyof Schema>;
 			documentClient: DocumentClient;
 			tableName: string;
+			onValidate?: () => Promise<void> | void;
+			onSave?: () => Promise<void> | void;
+			onCreate?: () => Promise<void> | void;
+			onDelete?: () => Promise<void> | void;
 		}
 	) {
 		this._jsonSchema = config.jsonSchema;
-		this._validatorFn = ajv.compile(this._jsonSchema);
+		this._validator = ajv.compile(this._jsonSchema);
 		this._hiddenKeys = config.hiddenKeys;
 		this._ownerKeys = config.ownerKeys;
 		this._db = dbClient(config.documentClient, config.tableName);
 
+		this._onValidate = config.onValidate ? config.onValidate : () => {};
+		this._onSave = config.onSave ? config.onSave : () => {};
+		this._onCreate = config.onCreate ? config.onCreate : () => {};
+		this._onDelete = config.onDelete ? config.onDelete : () => {};
+
 		const attributes = {
 			...props,
-			createdAt: props.createdAt || day().valueOf(),
-			updatedAt: props.updatedAt || day().valueOf(),
+			createdAt: props.createdAt || day().unix(),
+			updatedAt: props.updatedAt || day().unix(),
 			itemType: props.itemType || Item.itemSchema.title
 		} as Schema;
 
@@ -97,7 +111,7 @@ export class Item<Schema extends IItem> {
 	public set(data: Partial<Schema>) {
 		logger.info({ set: data });
 
-		const updatedAt = day().valueOf();
+		const updatedAt = day().unix();
 
 		this._current = { ...this._current, ...data, updatedAt };
 
@@ -122,23 +136,33 @@ export class Item<Schema extends IItem> {
 		return upick(this._current, ['pk', 'sk']);
 	}
 
-	public save = async (create = false) => {
-		this.validate();
+	public save = async () => {
+		await this._onSave();
 
-		create
-			? await this._db.put({
-					Item: this._current
-			  })
-			: await this._db.create({
-					Item: this._current
-			  });
+		await this.validate();
+
+		await this._db.put({
+			Item: this._current
+		});
 
 		return this;
 	};
 
-	public create = async () => this.save(true);
+	public create = async () => {
+		await this._onCreate();
+
+		await this.validate();
+
+		await this._db.create({
+			Item: this._current
+		});
+
+		return this;
+	};
 
 	public delete = async () => {
+		await this._onDelete();
+
 		await this._db.delete({
 			Key: this.pk
 		});
@@ -146,12 +170,14 @@ export class Item<Schema extends IItem> {
 		return;
 	};
 
-	public validate = () => {
+	public validate = async () => {
+		await this._onValidate();
+
 		logger.info('validating...');
 
-		const result = this._validatorFn(this._current);
+		const result = this._validator(this._current);
 
-		if (!result) throw new Response(BAD_REQUEST_400('Invalid Data'));
+		if (!result) throw new Response(BAD_REQUEST_400(this._validator.errors!));
 
 		return true;
 	};

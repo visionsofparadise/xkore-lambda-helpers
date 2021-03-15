@@ -2,7 +2,7 @@ import { IPrimaryKey, IItem, OptionalKeys, Item } from './Item';
 import AWS from 'aws-sdk';
 import { jsonObjectSchemaGenerator } from './jsonObjectSchemaGenerator';
 import { dbClient } from './dbClient';
-import { nanoid } from 'nanoid';
+import kuuid from 'kuuid';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
 	endpoint: 'localhost:8000',
@@ -15,14 +15,8 @@ export interface IDocumentation extends IItem {
 	documentationId: string;
 	description?: string;
 	service: string;
-	type: 'endpoint' | 'item' | 'event' | 'rule';
+	type: 'http' | 'item' | 'event' | 'rule';
 	group?: string;
-	authorizationType?: string;
-	baseURL?: string;
-	basePath?: string;
-	path?: string;
-	method?: string;
-	detailTypes?: Array<string>;
 	tags: Array<string>;
 	jsonSchemas: Array<string>;
 }
@@ -38,18 +32,13 @@ const jsonSchema = jsonObjectSchemaGenerator<IDocumentation>({
 		description: { type: 'string', nullable: true },
 		type: { type: 'string', nullable: true },
 		group: { type: 'string', nullable: true },
-		authorizationType: { type: 'string', nullable: true },
-		baseURL: { type: 'string', nullable: true },
-		basePath: { type: 'string', nullable: true },
-		path: { type: 'string', nullable: true },
-		method: { type: 'string', nullable: true },
-		detailTypes: { type: 'array', items: { type: 'string' }, nullable: true },
 		jsonSchemas: {
 			type: 'array',
 			items: { type: 'string' }
 		},
 		tags: { type: 'array', items: { type: 'string' } }
-	}
+	},
+	additionalProperties: true
 });
 
 export class Documentation extends Item<IDocumentation> {
@@ -60,9 +49,9 @@ export class Documentation extends Item<IDocumentation> {
 	public static ownerKeys: Array<keyof IDocumentation> = [];
 
 	constructor({
-		documentationId = nanoid(),
+		documentationId = kuuid.id(),
 		...params
-	}: OptionalKeys<IDocumentation, keyof IItem | 'documentationId' | 'tags' | 'group'>) {
+	}: OptionalKeys<IDocumentation, keyof IItem | 'documentationId' | 'tags' | 'group'> & { [x: string]: any }) {
 		super(
 			{
 				...params,

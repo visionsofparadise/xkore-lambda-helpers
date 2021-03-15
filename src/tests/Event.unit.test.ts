@@ -1,9 +1,9 @@
 import { EventBridge } from 'aws-sdk';
-import { nanoid } from 'nanoid';
+import kuuid from 'kuuid';
 import { Event } from '../Event';
 import { TestItem } from './TestItem';
 
-const testItem = new TestItem({ testAttribute: nanoid() });
+const testItem = new TestItem({ testAttribute: kuuid.id() });
 
 it('throws internal server error', async () => {
 	const event = new Event({

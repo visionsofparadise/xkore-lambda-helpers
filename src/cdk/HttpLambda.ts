@@ -72,7 +72,7 @@ export class HttpLambda extends Function implements Documented {
 				new Documentation({
 					...props,
 					documentationName: this.node.id,
-					type: 'endpoint',
+					type: 'http',
 					jsonSchemas,
 					authorizationType:
 						integration.options && integration.options.authorizer
