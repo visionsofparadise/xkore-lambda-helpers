@@ -66,9 +66,9 @@ export class Item<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey
 
 	public static primaryKeySchema = primaryKeySchema;
 	public static itemSchema = itemSchema;
-	public static jsonSchema: any = itemSchema;
-	public static hiddenKeys = [];
-	public static ownerKeys = [];
+	public static jsonSchema: object = itemSchema;
+	public static hiddenKeys: Array<string> = [];
+	public static ownerKeys: Array<string> = [];
 
 	protected _jsonSchema: JSONSchemaType<Schema>;
 	protected _validator: ValidateFunction<Schema>;
