@@ -1,4 +1,4 @@
-import { IPrimaryKey, IItem, RequiredKeys, Item } from './Item';
+import { IPrimaryKey, IItem, itemSchema, RequiredKeys, Item } from './Item';
 import { dbClient } from './dbClient';
 import { documentClient } from './helpers/documentClient';
 import { JSONSchemaType } from 'ajv';
@@ -20,7 +20,7 @@ export const documentationSchema: JSONSchemaType<IDocumentation> = {
 	description: 'Documentation containing deployment info and JSON schemas for items, events and more.',
 	type: 'object',
 	properties: {
-		...Item.itemSchema.properties!,
+		...itemSchema.properties!,
 		documentationName: { type: 'string' },
 		documentationId: { type: 'string' },
 		service: { type: 'string' },
@@ -33,32 +33,16 @@ export const documentationSchema: JSONSchemaType<IDocumentation> = {
 		},
 		tags: { type: 'array', items: { type: 'string' } }
 	},
-	required: [
-		...Item.itemSchema.required,
-		'documentationId',
-		'documentationName',
-		'type',
-		'service',
-		'jsonSchemas',
-		'tags'
-	],
+	required: [...itemSchema.required, 'documentationId', 'documentationName', 'type', 'service', 'jsonSchemas', 'tags'],
 	additionalProperties: true
 };
 
 export const documentationHelper = {};
 
-const documentationHiddenKeys = Item.keys([]);
-const documentationOwnerKeys = Item.keys([]);
+const hiddenKeys = Item.keys([]);
+const ownerKeys = Item.keys([]);
 
-export class Documentation extends Item<
-	IDocumentation,
-	typeof documentationHiddenKeys[number],
-	typeof documentationOwnerKeys[number]
-> {
-	public static jsonSchema = documentationSchema;
-	public static hiddenKeys = documentationHiddenKeys;
-	public static ownerKeys = documentationOwnerKeys;
-
+export class Documentation extends Item<IDocumentation, typeof hiddenKeys[number], typeof ownerKeys[number]> {
 	constructor(params: RequiredKeys<IDocumentation, 'documentationName' | 'service' | 'type'> & { [x: string]: any }) {
 		const id = kuuid.id();
 
@@ -77,8 +61,8 @@ export class Documentation extends Item<
 				documentClient,
 				tableName: 'test',
 				jsonSchema: documentationSchema,
-				hiddenKeys: documentationHiddenKeys,
-				ownerKeys: documentationOwnerKeys
+				hiddenKeys,
+				ownerKeys
 			}
 		);
 	}
