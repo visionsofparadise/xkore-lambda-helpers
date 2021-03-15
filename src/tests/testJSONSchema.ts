@@ -1,11 +1,10 @@
 import { JSONSchemaType } from 'ajv';
+import { jsonObjectSchemaGenerator } from '../jsonObjectSchemaGenerator';
 
-export const testJSONSchema: JSONSchemaType<{ testAttribute: string }> = {
+export const testJSONSchema: JSONSchemaType<{ testAttribute: string }> = jsonObjectSchemaGenerator({
 	title: 'test',
 	description: 'test',
-	type: 'object',
 	properties: {
 		testAttribute: { type: 'string' }
-	},
-	required: ['testAttribute']
-};
+	}
+});

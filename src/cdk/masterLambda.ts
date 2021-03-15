@@ -1,6 +1,6 @@
 import { Function, FunctionProps } from '@aws-cdk/aws-lambda';
 import { Construct } from '@aws-cdk/core';
-import { RuleLambda, RuleLambdaProps } from './RuleLambda';
+import { EventLambda, EventLambdaProps } from './EventLambda';
 import { HttpLambda, HttpLambdaProps } from './HttpLambda';
 
 export const masterLambda = (masterConfig: Pick<FunctionProps, 'code' | 'runtime'>) => {
@@ -24,12 +24,12 @@ export const masterLambda = (masterConfig: Pick<FunctionProps, 'code' | 'runtime
 				handler: `${id}.handler`
 			}),
 
-		initializeRuleLambda: (source: string) => (
+		initializeEventLambda: (source: string) => (
 			scope: Construct,
 			id: string,
-			config: Omit<RuleLambdaProps, 'handler' | 'code' | 'runtime' | 'source'>
+			config: Omit<EventLambdaProps, 'handler' | 'code' | 'runtime' | 'source'>
 		) =>
-			new RuleLambda(scope, id, {
+			new EventLambda(scope, id, {
 				...masterConfig,
 				...config,
 				handler: `${id}.handler`,

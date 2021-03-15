@@ -1,8 +1,8 @@
-import { logger } from './helpers/logger';
+import { logger } from './logger';
 import { JSONSchemaType } from 'ajv';
 import { EventBridgeEvent } from 'aws-lambda';
 
-export class RuleLambdaHandler<
+export class EventLambdaHandler<
 	DetailType extends string,
 	Detail extends object,
 	DetailJSONSchema = JSONSchemaType<Detail>

@@ -1,12 +1,13 @@
 import { dbClient } from './dbClient';
-import pick from 'lodash/pick';
-import omit from 'lodash/omit';
+import upick from 'upick';
+import uomit from 'uomit';
 import day from 'dayjs';
-import { JSONSchemaType, ValidateFunction } from 'ajv';
+import { JSONSchemaType } from 'ajv';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { logger } from './helpers/logger';
+import { jsonObjectSchemaGenerator } from './jsonObjectSchemaGenerator';
+import { logger } from './logger';
 import { Response, BAD_REQUEST_400 } from './Response';
-import { ajv } from './helpers/ajv';
+import { ajv } from './ajv';
 
 export type RequiredKeys<Data extends object, Keys extends keyof Data> = Pick<Data, Keys> & Partial<Omit<Data, Keys>>;
 export type OptionalKeys<Data extends object, Keys extends keyof Data> = Omit<Data, Keys> & Partial<Pick<Data, Keys>>;
@@ -16,16 +17,14 @@ export interface IPrimaryKey {
 	sk: string;
 }
 
-export const primaryKeySchema: JSONSchemaType<IPrimaryKey> = {
+export const primaryKeySchema = jsonObjectSchemaGenerator<IPrimaryKey>({
 	title: 'PrimaryKey',
 	description: 'Partition key and sort key.',
-	type: 'object',
 	properties: {
 		pk: { type: 'string' },
 		sk: { type: 'string' }
-	},
-	required: ['pk', 'sk']
-};
+	}
+});
 
 export interface IItem extends IPrimaryKey {
 	itemType: string;
@@ -34,44 +33,28 @@ export interface IItem extends IPrimaryKey {
 	updatedAt: number;
 }
 
-export const itemSchema: JSONSchemaType<IItem> = {
+export const itemSchema = jsonObjectSchemaGenerator<IItem>({
 	title: 'Item',
 	description: 'Item',
-	type: 'object',
 	properties: {
 		...primaryKeySchema.properties!,
-		itemType: { type: 'string', default: 'Item' },
+		itemType: { type: 'string' },
 		isSystemItem: { type: 'boolean', nullable: true },
 		createdAt: { type: 'number' },
 		updatedAt: { type: 'number' }
-	},
-	required: ['pk', 'sk', 'createdAt', 'updatedAt'],
-	additionalProperties: true
-};
+	}
+});
 
-export interface IItemConfig<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey extends keyof Schema> {
-	jsonSchema: JSONSchemaType<Schema>;
-	onValidate?: () => Promise<void> | void;
-	onSave?: () => Promise<void> | void;
-	onCreate?: () => Promise<void> | void;
-	onDelete?: () => Promise<void> | void;
-	hiddenKeys: Array<HiddenKey>;
-	ownerKeys: Array<OwnerKey>;
-	documentClient: DocumentClient;
-	tableName: string;
-}
-export class Item<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey extends keyof Schema> {
+export class Item<Schema extends IItem> {
+	public static readonly primaryKeySchema = primaryKeySchema;
+	public static readonly itemSchema = itemSchema;
 	public static tags: Array<string> = [];
-	public static keys = <K extends string>(keys: Array<K>) => keys;
+	public static readonly jsonSchema: object;
 
 	protected _jsonSchema: JSONSchemaType<Schema>;
-	protected _validator: ValidateFunction<Schema>;
-	protected _onValidate: () => Promise<void> | void;
-	protected _onSave: () => Promise<void> | void;
-	protected _onCreate: () => Promise<void> | void;
-	protected _onDelete: () => Promise<void> | void;
-	protected _hiddenKeys: Array<HiddenKey>;
-	protected _ownerKeys: Array<OwnerKey>;
+	protected _validatorFn: (data: Schema) => boolean;
+	protected _hiddenKeys: Array<keyof Schema>;
+	protected _ownerKeys: Array<keyof Schema>;
 	protected _db: ReturnType<typeof dbClient>;
 
 	protected _initial: Schema;
@@ -79,22 +62,26 @@ export class Item<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey
 
 	constructor(
 		props: OptionalKeys<Schema, 'createdAt' | 'updatedAt'>,
-		config: IItemConfig<Schema, HiddenKey, OwnerKey>
+		config: {
+			jsonSchema: JSONSchemaType<Schema>;
+			tags?: Array<string>;
+			hiddenKeys: Array<keyof Schema>;
+			ownerKeys: Array<keyof Schema>;
+			documentClient: DocumentClient;
+			tableName: string;
+		}
 	) {
 		this._jsonSchema = config.jsonSchema;
-		this._validator = ajv.compile(this._jsonSchema);
-		this._onValidate = config.onValidate ? config.onValidate : () => {};
-		this._onSave = config.onSave ? config.onSave : () => {};
-		this._onCreate = config.onCreate ? config.onCreate : () => {};
-		this._onDelete = config.onDelete ? config.onDelete : () => {};
+		this._validatorFn = ajv.compile(this._jsonSchema);
 		this._hiddenKeys = config.hiddenKeys;
 		this._ownerKeys = config.ownerKeys;
 		this._db = dbClient(config.documentClient, config.tableName);
 
 		const attributes = {
 			...props,
-			createdAt: props.createdAt || day().unix(),
-			updatedAt: props.updatedAt || day().unix()
+			createdAt: props.createdAt || day().valueOf(),
+			updatedAt: props.updatedAt || day().valueOf(),
+			itemType: props.itemType || Item.itemSchema.title
 		} as Schema;
 
 		this._initial = attributes;
@@ -110,9 +97,11 @@ export class Item<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey
 	public set(data: Partial<Schema>) {
 		logger.info({ set: data });
 
-		const updatedAt = day().unix();
+		const updatedAt = day().valueOf();
 
 		this._current = { ...this._current, ...data, updatedAt };
+
+		this.validate();
 
 		return;
 	}
@@ -122,44 +111,34 @@ export class Item<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey
 	}
 
 	public get owner() {
-		return omit(this._current, this._hiddenKeys);
+		return uomit(this._current, this._hiddenKeys);
 	}
 
 	public get public() {
-		return omit(this._current, [...this._hiddenKeys, ...this._ownerKeys]);
+		return uomit(this._current, [...this._hiddenKeys, ...this._ownerKeys]);
 	}
 
 	public get pk() {
-		return pick(this._current, ['pk', 'sk']);
+		return upick(this._current, ['pk', 'sk']);
 	}
 
-	public save = async () => {
-		await this.validate();
+	public save = async (create = false) => {
+		this.validate();
 
-		await this._onSave();
-
-		await this._db.put({
-			Item: this._current
-		});
-
-		return this;
-	};
-
-	public create = async () => {
-		await this.validate();
-
-		await this._onCreate();
-
-		await this._db.create({
-			Item: this._current
-		});
+		create
+			? await this._db.put({
+					Item: this._current
+			  })
+			: await this._db.create({
+					Item: this._current
+			  });
 
 		return this;
 	};
+
+	public create = async () => this.save(true);
 
 	public delete = async () => {
-		await this._onDelete();
-
 		await this._db.delete({
 			Key: this.pk
 		});
@@ -167,14 +146,12 @@ export class Item<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey
 		return;
 	};
 
-	public validate = async () => {
+	public validate = () => {
 		logger.info('validating...');
 
-		await this._onValidate();
+		const result = this._validatorFn(this._current);
 
-		const result = this._validator(this._current);
-
-		if (!result) throw new Response(BAD_REQUEST_400(this._validator.errors));
+		if (!result) throw new Response(BAD_REQUEST_400('Invalid Data'));
 
 		return true;
 	};

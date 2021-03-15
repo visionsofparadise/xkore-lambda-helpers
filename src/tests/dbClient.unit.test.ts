@@ -1,8 +1,8 @@
 import AWS from 'aws-sdk';
-import pick from 'lodash/pick';
+import upick from 'upick';
 import { IItem } from '../Item';
 import { dbClient } from '../dbClient';
-import kuuid from 'kuuid';
+import { nanoid } from 'nanoid';
 
 const documentClient = new AWS.DynamoDB.DocumentClient({
 	endpoint: 'localhost:8000',
@@ -13,8 +13,8 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 const db = dbClient(documentClient, 'test');
 
 const testData = () => ({
-	pk: kuuid.id(),
-	sk: kuuid.id(),
+	pk: nanoid(),
+	sk: nanoid(),
 	testAttribute: 'test'
 });
 
@@ -29,10 +29,10 @@ it('gets item', async () => {
 		.promise();
 
 	const Item = await db.get<typeof input>({
-		Key: pick(input, ['pk', 'sk'])
+		Key: upick(input, ['pk', 'sk'])
 	});
 
-	expect(pick(Item, ['pk', 'sk', 'testAttribute'])).toStrictEqual(input);
+	expect(upick(Item, ['pk', 'sk', 'testAttribute'])).toStrictEqual(input);
 });
 
 it('throws on item not found', async () => {
@@ -41,7 +41,7 @@ it('throws on item not found', async () => {
 
 	await db
 		.get<typeof input>({
-			Key: pick(input, ['pk', 'sk'])
+			Key: upick(input, ['pk', 'sk'])
 		})
 		.catch(err => expect(err).toBeDefined());
 });
@@ -56,11 +56,11 @@ it('creates item', async () => {
 	const { Item } = ((await documentClient
 		.get({
 			TableName: 'test',
-			Key: pick(input, ['pk', 'sk'])
+			Key: upick(input, ['pk', 'sk'])
 		})
 		.promise()) as unknown) as { Item: typeof input & IItem };
 
-	expect(pick(Item, ['pk', 'sk', 'testAttribute'])).toStrictEqual(input);
+	expect(upick(Item, ['pk', 'sk', 'testAttribute'])).toStrictEqual(input);
 });
 
 it('throws if item exists and has isNew', async () => {
@@ -88,7 +88,7 @@ it('updates an attribute on an item', async () => {
 		.promise();
 
 	await db.update<typeof input>({
-		Key: pick(input, ['pk', 'sk']),
+		Key: upick(input, ['pk', 'sk']),
 		UpdateExpression: 'SET testAttribute = :testAttribute',
 		ExpressionAttributeValues: {
 			':testAttribute': 'updated'
@@ -98,7 +98,7 @@ it('updates an attribute on an item', async () => {
 	const { Item } = ((await documentClient
 		.get({
 			TableName: 'test',
-			Key: pick(input, ['pk', 'sk'])
+			Key: upick(input, ['pk', 'sk'])
 		})
 		.promise()) as unknown) as { Item: typeof input & IItem };
 
@@ -119,7 +119,7 @@ it('updates attributes on an item', async () => {
 		.promise();
 
 	await db.update<typeof input>({
-		Key: pick(input, ['pk', 'sk']),
+		Key: upick(input, ['pk', 'sk']),
 		UpdateExpression: 'SET testAttribute = :testAttribute, testAttribute2 = :testAttribute2',
 		ExpressionAttributeValues: {
 			':testAttribute': 'updated',
@@ -130,7 +130,7 @@ it('updates attributes on an item', async () => {
 	const { Item } = ((await documentClient
 		.get({
 			TableName: 'test',
-			Key: pick(input, ['pk', 'sk'])
+			Key: upick(input, ['pk', 'sk'])
 		})
 		.promise()) as unknown) as { Item: typeof input & IItem };
 
@@ -152,14 +152,14 @@ it('removes attributes off an item', async () => {
 		.promise();
 
 	await db.update<typeof input>({
-		Key: pick(input, ['pk', 'sk']),
+		Key: upick(input, ['pk', 'sk']),
 		UpdateExpression: 'REMOVE testAttribute, testAttribute2'
 	});
 
 	const { Item } = ((await documentClient
 		.get({
 			TableName: 'test',
-			Key: pick(input, ['pk', 'sk'])
+			Key: upick(input, ['pk', 'sk'])
 		})
 		.promise()) as unknown) as { Item: typeof input & IItem };
 
@@ -238,13 +238,13 @@ it('deletes item', async () => {
 		.promise();
 
 	await db.delete({
-		Key: pick(input, ['pk', 'sk'])
+		Key: upick(input, ['pk', 'sk'])
 	});
 
 	await documentClient
 		.get({
 			TableName: 'test',
-			Key: pick(input, ['pk', 'sk'])
+			Key: upick(input, ['pk', 'sk'])
 		})
 		.promise()
 		.catch(err => expect(err).toBeDefined());
@@ -255,7 +255,7 @@ it('throws on delete item not found', async () => {
 
 	await db
 		.delete({
-			Key: pick(input, ['pk', 'sk'])
+			Key: upick(input, ['pk', 'sk'])
 		})
 		.catch(err => expect(err).toBeDefined());
 });

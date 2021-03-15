@@ -1,15 +1,15 @@
 import { EventBridge } from 'aws-sdk';
-import kuuid from 'kuuid';
+import { nanoid } from 'nanoid';
 import { Event } from '../Event';
-import { TestItem, testItemJSONSchema } from './TestItem';
+import { TestItem } from './TestItem';
 
-const testItem = new TestItem({ testAttribute: kuuid.id() });
+const testItem = new TestItem({ testAttribute: nanoid() });
 
 it('throws internal server error', async () => {
 	const event = new Event({
 		source: 'test',
 		detailType: 'test',
-		detailJSONSchema: testItemJSONSchema,
+		detailJSONSchema: TestItem.jsonSchema,
 		eventbridge: ({
 			putEvents: jest.fn().mockReturnValue({
 				promise: jest.fn().mockRejectedValue('error')
@@ -26,7 +26,7 @@ it('sends event', async () => {
 	const event = new Event({
 		source: 'test',
 		detailType: 'test',
-		detailJSONSchema: testItemJSONSchema,
+		detailJSONSchema: TestItem.jsonSchema,
 		eventbridge: ({
 			putEvents: jest.fn().mockReturnValue({
 				promise: jest.fn().mockResolvedValue('success')
@@ -45,7 +45,7 @@ it('sends events', async () => {
 	const event = new Event({
 		source: 'test',
 		detailType: 'test',
-		detailJSONSchema: testItemJSONSchema,
+		detailJSONSchema: TestItem.jsonSchema,
 		eventbridge: ({
 			putEvents: jest.fn().mockReturnValue({
 				promise: jest.fn().mockResolvedValue('success')

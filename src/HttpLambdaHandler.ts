@@ -1,8 +1,8 @@
 import { Response, SUCCESS_200, SUCCESS_NO_CONTENT_204 } from './Response';
-import { logger } from './helpers/logger';
+import { logger } from './logger';
 import { APIGatewayEvent } from 'aws-lambda/trigger/api-gateway-proxy';
 import { JSONSchemaType, ValidateFunction } from 'ajv';
-import { ajv } from './helpers/ajv';
+import { ajv } from './ajv';
 
 interface HttpLambdaEvent<
 	P extends object | undefined,

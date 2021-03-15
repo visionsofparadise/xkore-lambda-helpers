@@ -1,6 +1,6 @@
 import { JSONSchemaType } from 'ajv';
 import { EventBridge } from 'aws-sdk';
-import { logger } from './helpers/logger';
+import { logger } from './logger';
 
 export class Event<Detail extends object> {
 	public tags: Array<string>;

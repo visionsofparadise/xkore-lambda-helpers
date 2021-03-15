@@ -1,5 +1,5 @@
 import AWS from 'aws-sdk';
-import kuuid from 'kuuid';
+import { nanoid } from 'nanoid';
 import { dbClient } from '../dbClient';
 import { TestItem } from './TestItem';
 
@@ -12,9 +12,9 @@ const documentClient = new AWS.DynamoDB.DocumentClient({
 const db = dbClient(documentClient, 'test');
 
 it('validates item', async () => {
-	const testData = new TestItem({ testAttribute: kuuid.id() });
+	const testData = new TestItem({ testAttribute: nanoid() });
 
-	const result = await testData.validate();
+	const result = testData.validate();
 
 	expect(result).toBe(true);
 });
@@ -25,14 +25,14 @@ it('throws on invalid item', async () => {
 	const testData = new TestItem({ testAttribute: (123 as unknown) as string });
 
 	try {
-		await testData.validate();
+		testData.validate();
 	} catch (err) {
 		expect(err).toBeDefined();
 	}
 });
 
 it('creates item', async () => {
-	const testData = await new TestItem({ testAttribute: kuuid.id() }).create();
+	const testData = await new TestItem({ testAttribute: nanoid() }).create();
 
 	const getData = await db.get({
 		Key: testData.pk
@@ -43,7 +43,7 @@ it('creates item', async () => {
 });
 
 it('saves data to item', async () => {
-	const testData = new TestItem({ testAttribute: kuuid.id() });
+	const testData = new TestItem({ testAttribute: nanoid() });
 
 	await documentClient
 		.put({
@@ -66,11 +66,11 @@ it('saves data to item', async () => {
 });
 
 it('save fails if item doesnt exist', async () => {
-	await new TestItem({ testAttribute: kuuid.id() }).save().catch(err => expect(err).toBeDefined());
+	await new TestItem({ testAttribute: nanoid() }).save().catch(err => expect(err).toBeDefined());
 });
 
 it('deletes item', async () => {
-	const testData = new TestItem({ testAttribute: kuuid.id() });
+	const testData = new TestItem({ testAttribute: nanoid() });
 
 	await documentClient
 		.put({

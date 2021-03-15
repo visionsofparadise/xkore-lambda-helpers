@@ -24,7 +24,7 @@ it('creates and gets new documentation', async () => {
 
 	const getDocumentation = await Documentation.get(documentation.pk, db);
 
-	expect(getDocumentation).toStrictEqual(documentation.data);
+	expect(getDocumentation.data).toStrictEqual(documentation.data);
 
 	await documentation.delete();
 });
@@ -34,5 +34,5 @@ it('lists documentation', async () => {
 
 	const documentation = await Documentation.list(db);
 
-	expect(documentation.Items!.length).toBe(1);
+	expect(documentation.length).toBe(1);
 });

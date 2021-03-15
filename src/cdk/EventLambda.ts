@@ -1,31 +1,31 @@
 import { Construct, Stack } from '@aws-cdk/core';
 import { FunctionProps, Function } from '@aws-cdk/aws-lambda';
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
-import { Documentation, IDocumentation } from '../Documentation';
+import { IDocumentation, Documentation } from '../Documentation';
 import { Rule, RuleProps } from '@aws-cdk/aws-events';
 import { Documented } from './DocumentationItems';
 
-export interface RuleLambdaProps extends FunctionProps {
-	RuleLambdaHandler: RuleLambda['RuleLambdaHandler'];
+export interface EventLambdaProps extends FunctionProps {
+	EventLambdaHandler: EventLambda['EventLambdaHandler'];
 	source: string;
 	tags?: Array<string>;
 	eventPattern?: RuleProps['eventPattern'];
 }
 
-export class RuleLambda extends Function implements Documented {
-	public RuleLambdaHandler: { tags?: Array<string>; detailType: Array<string>; detailJSONSchema: object };
+export class EventLambda extends Function implements Documented {
+	public EventLambdaHandler: { tags?: Array<string>; detailType: Array<string>; detailJSONSchema: object };
 
-	constructor(scope: Construct, id: string, props: RuleLambdaProps) {
+	constructor(scope: Construct, id: string, props: EventLambdaProps) {
 		super(scope, id, props);
 
-		this.RuleLambdaHandler = props.RuleLambdaHandler;
+		this.EventLambdaHandler = props.EventLambdaHandler;
 
-		if (props.tags) this.RuleLambdaHandler.tags = [...this.RuleLambdaHandler.tags!, ...props.tags];
+		if (props.tags) this.EventLambdaHandler.tags = [...this.EventLambdaHandler.tags!, ...props.tags];
 
 		new Rule(this, `${id}Rule`, {
 			eventPattern: {
 				source: [props.source],
-				detailType: this.RuleLambdaHandler.detailType,
+				detailType: this.EventLambdaHandler.detailType,
 				...props.eventPattern
 			},
 			targets: [new LambdaFunction(this)]
@@ -37,10 +37,10 @@ export class RuleLambda extends Function implements Documented {
 
 		const jsonSchemas = [];
 
-		if (this.RuleLambdaHandler.detailJSONSchema) {
+		if (this.EventLambdaHandler.detailJSONSchema) {
 			jsonSchemas.push(
 				stack.toJsonString({
-					value: this.RuleLambdaHandler.detailJSONSchema
+					value: this.EventLambdaHandler.detailJSONSchema
 				})
 			);
 		}
@@ -50,10 +50,10 @@ export class RuleLambda extends Function implements Documented {
 				...props,
 				documentationName: this.node.id,
 				type: 'rule',
-				detailTypes: this.RuleLambdaHandler.detailType,
+				detailTypes: this.EventLambdaHandler.detailType,
 				jsonSchemas,
-				tags: this.RuleLambdaHandler.tags
-			}).data
+				tags: this.EventLambdaHandler.tags
+			})
 		];
 	};
 }

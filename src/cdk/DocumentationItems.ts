@@ -1,10 +1,9 @@
 import { Construct } from '@aws-cdk/core';
-import { IItem } from '../Item';
-import { IDocumentation } from '../Documentation';
+import { IDocumentation, Documentation } from '../Documentation';
 import { SeedItems } from './SeedItems';
 
 export interface Documented {
-	createDocumentation: (props: Pick<IDocumentation, 'service' | 'group'>) => Array<IItem>;
+	createDocumentation: (props: Pick<IDocumentation, 'service' | 'group'>) => Array<Documentation>;
 }
 
 export interface DocumentationItemsProps {
@@ -17,12 +16,12 @@ export interface DocumentationItemsProps {
 }
 
 export class DocumentationItems extends Construct {
-	public documentationItems: Array<IItem>;
+	public documentationItems: Array<Documentation>;
 
 	constructor(scope: Construct, id: string, props: DocumentationItemsProps) {
 		super(scope, id);
 
-		let documentationItems: Array<IItem> = [];
+		let documentationItems: Array<Documentation> = [];
 
 		for (const group of props.groups) {
 			for (const item of group.items) {
@@ -36,10 +35,11 @@ export class DocumentationItems extends Construct {
 		}
 
 		this.documentationItems = documentationItems;
+		const documentationItemsData = documentationItems.map(documentation => documentation.data);
 
 		new SeedItems(this, 'DocumentationItems', {
 			tableArn: props.tableArn,
-			items: this.documentationItems
+			items: documentationItemsData
 		});
 	}
 }

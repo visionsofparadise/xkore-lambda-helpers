@@ -1,6 +1,6 @@
 import { DynamoDBRecord } from 'aws-lambda/trigger/dynamodb-stream';
 import { Converter } from 'aws-sdk/clients/dynamodb';
-import { logger } from './helpers/logger';
+import { logger } from './logger';
 import { IItem } from './Item';
 
 export type Records<OldItem, NewItem> = Array<Record<OldItem, NewItem>>;

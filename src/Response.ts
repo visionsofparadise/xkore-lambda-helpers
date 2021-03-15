@@ -1,10 +1,19 @@
-import { logger } from './helpers/logger';
+import { logger } from './logger';
 
 export interface IResponse {
 	statusCode: number;
 	body?: any;
 	headers?: Required<{}>;
 }
+
+// interface DynamoDBError {
+// 	statusCode: number;
+// 	message: string
+// }
+
+// export const dynamoDBErrorMap = (error: DynamoDBError) => {
+
+// }
 
 export class Response implements IResponse {
 	public statusCode: number;
