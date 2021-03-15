@@ -16,7 +16,7 @@ export interface IPrimaryKey {
 	sk: string;
 }
 
-export const primaryKeySchema: JSONSchemaType<IPrimaryKey> = {
+const primaryKeySchema: JSONSchemaType<IPrimaryKey> = {
 	title: 'PrimaryKey',
 	description: 'Partition key and sort key.',
 	type: 'object',
@@ -34,7 +34,7 @@ export interface IItem extends IPrimaryKey {
 	updatedAt: number;
 }
 
-export const itemSchema: JSONSchemaType<IItem> = {
+const itemSchema: JSONSchemaType<IItem> = {
 	title: 'Item',
 	description: 'Item',
 	type: 'object',
@@ -63,6 +63,12 @@ export interface IItemConfig<Schema extends IItem, HiddenKey extends keyof Schem
 export class Item<Schema extends IItem, HiddenKey extends keyof Schema, OwnerKey extends keyof Schema> {
 	public static tags: Array<string> = [];
 	public static keys = <K extends string>(keys: Array<K>) => keys;
+
+	public static primaryKeySchema = primaryKeySchema;
+	public static itemSchema = itemSchema;
+	public static jsonSchema: any = itemSchema;
+	public static hiddenKeys = [];
+	public static ownerKeys = [];
 
 	protected _jsonSchema: JSONSchemaType<Schema>;
 	protected _validator: ValidateFunction<Schema>;
