@@ -7,18 +7,8 @@
 		"patch": "tsc && jest unit && npm version patch && npm publish"
 	},
 	"dependencies": {
-		"@aws-cdk/aws-apigateway": "^1.93.0",
-		"@aws-cdk/aws-dynamodb": "^1.93.0",
-		"@aws-cdk/aws-events": "^1.93.0",
-		"@aws-cdk/aws-events-targets": "^1.93.0",
-		"@aws-cdk/aws-iam": "^1.93.0",
-		"@aws-cdk/aws-lambda": "^1.93.0",
-		"@aws-cdk/core": "^1.93.0",
-		"@aws-cdk/custom-resources": "^1.93.0",
 		"@types/aws-lambda": "^8.10.63",
-		"@types/lodash": "^4.14.168",
 		"@types/node": "^13.13.25",
-		"ajv": "^7.2.1",
 		"axios": "^0.21.1",
 		"dayjs": "^1.9.1",
 		"envlog": "^1.0.3",
@@ -27,8 +17,18 @@
 		"udelay": "^1.0.0"
 	},
 	"devDependencies": {
+		"@aws-cdk/aws-apigateway": "^1.91.0",
+		"@aws-cdk/aws-dynamodb": "^1.91.0",
+		"@aws-cdk/aws-events": "^1.91.0",
+		"@aws-cdk/aws-events-targets": "^1.91.0",
+		"@aws-cdk/aws-iam": "^1.91.0",
+		"@aws-cdk/aws-lambda": "^1.91.0",
+		"@aws-cdk/core": "^1.91.0",
+		"@aws-cdk/custom-resources": "^1.91.0",
 		"@shelf/jest-dynamodb": "^1.8.1",
 		"@types/jest": "^24.9.1",
+		"@types/lodash": "^4.14.168",
+		"ajv": "^7.2.1",
 		"aws-cdk": "^1.91.0",
 		"aws-lambda": "^1.0.6",
 		"aws-sdk": "^2.854.0",
@@ -41,8 +41,17 @@
 		"typescript": "^4.2.3"
 	},
 	"peerDependencies": {
+		"ajv": "^7.2.1",
 		"aws-sdk": "^2.816.0",
-		"aws-cdk": "^1.91.0"
+		"aws-cdk": "^1.91.0",
+		"@aws-cdk/aws-iam": "^1.91.0",
+		"@aws-cdk/aws-apigateway": "^1.91.0",
+		"@aws-cdk/aws-events": "^1.91.0",
+		"@aws-cdk/aws-events-targets": "^1.91.0",
+		"@aws-cdk/custom-resources": "^1.91.0",
+		"@aws-cdk/aws-lambda": "^1.91.0",
+		"@aws-cdk/aws-dynamodb": "^1.91.0",
+		"@aws-cdk/core": "^1.91.0"
 	},
 	"author": "xKore",
 	"license": "MIT",
