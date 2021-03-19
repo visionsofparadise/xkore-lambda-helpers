@@ -57,10 +57,10 @@ export class Item<Schema extends IItem> {
 	protected _hiddenKeys: Array<keyof Schema>;
 	protected _ownerKeys: Array<keyof Schema>;
 	protected _db: ReturnType<typeof dbClient>;
-	protected _onValidate: () => Promise<void> | void;
-	protected _onSave: () => Promise<void> | void;
-	protected _onCreate: () => Promise<void> | void;
-	protected _onDelete: () => Promise<void> | void;
+	protected _onValidate: () => Promise<any> | any;
+	protected _onSave: () => Promise<any> | any;
+	protected _onCreate: () => Promise<any> | any;
+	protected _onDelete: () => Promise<any> | any;
 
 	protected _initial: Schema;
 	protected _current: Schema;
@@ -74,10 +74,10 @@ export class Item<Schema extends IItem> {
 			ownerKeys: Array<keyof Schema>;
 			documentClient: DocumentClient;
 			tableName: string;
-			onValidate?: () => Promise<void> | void;
-			onSave?: () => Promise<void> | void;
-			onCreate?: () => Promise<void> | void;
-			onDelete?: () => Promise<void> | void;
+			onValidate?: () => Promise<any> | any;
+			onSave?: () => Promise<any> | any;
+			onCreate?: () => Promise<any> | any;
+			onDelete?: () => Promise<any> | any;
 		}
 	) {
 		this._jsonSchema = config.jsonSchema;
