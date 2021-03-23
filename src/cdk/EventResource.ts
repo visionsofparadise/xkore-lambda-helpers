@@ -36,6 +36,7 @@ export class EventResource<Detail extends object> extends Construct implements D
 				...props,
 				documentationName: this.node.id,
 				type: 'event',
+				detailType: this.Event.detailType,
 				jsonSchemas,
 				tags: this.Event.tags
 			})
