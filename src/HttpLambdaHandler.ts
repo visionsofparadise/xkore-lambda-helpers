@@ -58,6 +58,7 @@ export class HttpLambdaHandler<
 		this.paramsJSONSchema = config.paramsJSONSchema;
 		this.bodyJSONSchema = config.bodyJSONSchema;
 		this.queryJSONSchema = config.queryJSONSchema;
+		this.responseJSONSchema = config.responseJSONSchema;
 		this.tags = config.tags || [];
 		this.method = config.method;
 
